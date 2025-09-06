@@ -23,10 +23,10 @@ const (
 )
 
 var (
-	configPath = flag.String("p", "", "Path to configuration directory")
-	showHelp   = flag.Bool("h", false, "Show help message")
-	showVer    = flag.Bool("v", false, "Show version")
-	debug      = flag.Bool("d", false, "Enable debug logging")
+	configPath = flag.String("profile", "", "Path to configuration directory")
+	showHelp   = flag.Bool("help", false, "Show help message")
+	showVer    = flag.Bool("version", false, "Show version")
+	debug      = flag.Bool("debug", false, "Enable debug logging")
 )
 
 func main() {
