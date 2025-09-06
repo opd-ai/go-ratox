@@ -80,3 +80,5 @@ go.work.sum
 # .idea/
 # .vscode/
 /go-ratox
+/ratox-go
+/ratox*
