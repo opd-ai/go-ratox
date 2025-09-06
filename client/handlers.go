@@ -100,15 +100,26 @@ func (c *Client) handleFriendStatusChange(friendID uint32, status int) {
 	}
 	c.friendsMu.Unlock()
 
-	if c.config.Debug && exists {
-		statusStr := "none"
+	if exists {
+		// Write status to friend's status FIFO
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		statusStr := "offline"
 		switch status {
+		case 0:
+			statusStr = "online"
 		case 1:
 			statusStr = "away"
 		case 2:
 			statusStr = "busy"
 		}
-		log.Printf("Friend %s (%d) status changed to: %s", friend.Name, friendID, statusStr)
+
+		if err := c.fifoManager.WriteFriendStatus(friendIDStr, statusStr); err != nil {
+			log.Printf("Failed to write friend status to FIFO: %v", err)
+		}
+
+		if c.config.Debug {
+			log.Printf("Friend %s (%d) status changed to: %s", friend.Name, friendID, statusStr)
+		}
 	}
 }
 

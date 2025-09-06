@@ -138,11 +138,10 @@ func (c *Client) setupCallbacks() {
 		c.handleFriendNameChange(friendID, name)
 	})
 
-	// TODO: Fix callback signatures for these when we understand the API better
 	// Friend status callback
-	// c.tox.OnFriendStatus(func(friendID uint32, status int) {
-	//     c.handleFriendStatusChange(friendID, status)
-	// })
+	c.tox.OnFriendStatus(func(friendID uint32, status toxcore.FriendStatus) {
+		c.handleFriendStatusChange(friendID, int(status))
+	})
 
 	// File receive callback
 	c.tox.OnFileRecv(func(friendID uint32, fileID uint32, kind uint32, fileSize uint64, filename string) {
