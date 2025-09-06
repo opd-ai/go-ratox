@@ -226,6 +226,13 @@ func (c *Client) Run() error {
 		c.autoSave()
 	}()
 
+	// Update connection status periodically
+	c.wg.Add(1)
+	go func() {
+		defer c.wg.Done()
+		c.updateConnectionStatus()
+	}()
+
 	// Main Tox iteration loop
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
@@ -268,6 +275,25 @@ func (c *Client) autoSave() {
 			return
 		case <-ticker.C:
 			c.saveToxData()
+		}
+	}
+}
+
+// updateConnectionStatus periodically updates the connection status file
+func (c *Client) updateConnectionStatus() {
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case <-ticker.C:
+			if err := c.fifoManager.createConnectionStatusFile(); err != nil {
+				if c.config.Debug {
+					log.Printf("Failed to update connection status: %v", err)
+				}
+			}
 		}
 	}
 }

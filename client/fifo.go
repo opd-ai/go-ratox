@@ -47,11 +47,12 @@ type FIFO struct {
 // FIFO names and permissions
 const (
 	// Global FIFOs
-	RequestIn     = "request_in"     // Write-only - accept friend requests
-	RequestOut    = "request_out"    // Read-only - incoming friend requests
-	Name          = "name"           // Write-only - set display name
-	StatusMessage = "status_message" // Write-only - set status message
-	ID            = "id"             // Read-only - Tox ID file
+	RequestIn        = "request_in"        // Write-only - accept friend requests
+	RequestOut       = "request_out"       // Read-only - incoming friend requests
+	Name             = "name"              // Write-only - set display name
+	StatusMessage    = "status_message"    // Write-only - set status message
+	ID               = "id"                // Read-only - Tox ID file
+	ConnectionStatus = "connection_status" // Read-only - connection status info
 
 	// Friend-specific FIFOs
 	TextIn  = "text_in"  // Write-only - send messages
@@ -135,6 +136,11 @@ func (fm *FIFOManager) createGlobalFIFOs() error {
 	// Create ID file with Tox ID
 	if err := fm.createIDFile(); err != nil {
 		return fmt.Errorf("failed to create ID file: %w", err)
+	}
+
+	// Create connection status file
+	if err := fm.createConnectionStatusFile(); err != nil {
+		return fmt.Errorf("failed to create connection status file: %w", err)
 	}
 
 	return nil
@@ -241,6 +247,49 @@ func (fm *FIFOManager) createIDFile() error {
 
 	if fm.config.Debug {
 		log.Printf("Created ID file: %s", idPath)
+	}
+
+	return nil
+}
+
+// createConnectionStatusFile creates a file containing connection status information
+func (fm *FIFOManager) createConnectionStatusFile() error {
+	statusPath := fm.config.GlobalFIFOPath(ConnectionStatus)
+
+	connectionStatus := fm.client.tox.SelfGetConnectionStatus()
+	friends := fm.client.tox.GetFriends()
+	friendsCount := len(friends)
+
+	// Count online friends
+	onlineFriends := 0
+	fm.client.friendsMu.RLock()
+	for _, friend := range fm.client.friends {
+		if friend.Online {
+			onlineFriends++
+		}
+	}
+	fm.client.friendsMu.RUnlock()
+
+	var statusStr string
+	switch connectionStatus {
+	case 0: // ConnectionNone
+		statusStr = "offline"
+	case 1: // ConnectionTCP
+		statusStr = "tcp"
+	case 2: // ConnectionUDP
+		statusStr = "udp"
+	default:
+		statusStr = "unknown"
+	}
+
+	statusInfo := fmt.Sprintf("connection: %s\nfriends: %d total, %d online\n", statusStr, friendsCount, onlineFriends)
+
+	if err := os.WriteFile(statusPath, []byte(statusInfo), 0644); err != nil {
+		return fmt.Errorf("failed to write connection status file: %w", err)
+	}
+
+	if fm.config.Debug {
+		log.Printf("Updated connection status file: %s", statusPath)
 	}
 
 	return nil
