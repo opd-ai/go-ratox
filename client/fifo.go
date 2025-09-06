@@ -342,13 +342,21 @@ func (fm *FIFOManager) writeFIFO(path, data string) error {
 // handleRequestIn processes friend request acceptance
 func (fm *FIFOManager) handleRequestIn(toxID string) {
 	toxID = strings.TrimSpace(toxID)
-	if len(toxID) != 76 {
-		log.Printf("Invalid Tox ID format: %s", toxID)
+	
+	// Accept both 64-character public key and 76-character full Tox ID
+	var publicKeyHex string
+	if len(toxID) == 64 {
+		// 64-character public key format
+		publicKeyHex = toxID
+	} else if len(toxID) == 76 {
+		// 76-character full Tox ID format (public key + nospam + checksum)
+		publicKeyHex = toxID[:64]
+	} else {
+		log.Printf("Invalid Tox ID format: expected 64 or 76 characters, got %d", len(toxID))
 		return
 	}
 
-	// Decode public key from Tox ID (first 64 hex characters)
-	publicKeyHex := toxID[:64]
+	// Decode public key from hex
 	publicKeyBytes, err := hex.DecodeString(publicKeyHex)
 	if err != nil {
 		log.Printf("Invalid public key in Tox ID: %v", err)
