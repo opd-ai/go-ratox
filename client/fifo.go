@@ -165,7 +165,19 @@ func (fm *FIFOManager) CreateFriendFIFOs(friendID string) error {
 
 // createFIFO creates a named pipe with the specified permissions
 func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
-	// Remove existing FIFO if it exists
+	// Clean up existing FIFO resources if they exist
+	fm.fifosMu.Lock()
+	if existingFIFO, exists := fm.fifos[path]; exists {
+		// Close any open file handles
+		if existingFIFO.File != nil {
+			existingFIFO.File.Close()
+		}
+		// Remove from map
+		delete(fm.fifos, path)
+	}
+	fm.fifosMu.Unlock()
+
+	// Remove existing FIFO file if it exists
 	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to remove existing FIFO: %w", err)
 	}
@@ -342,7 +354,7 @@ func (fm *FIFOManager) writeFIFO(path, data string) error {
 // handleRequestIn processes friend request acceptance
 func (fm *FIFOManager) handleRequestIn(toxID string) {
 	toxID = strings.TrimSpace(toxID)
-	
+
 	// Accept both 64-character public key and 76-character full Tox ID
 	var publicKeyHex string
 	if len(toxID) == 64 {
