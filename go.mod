@@ -2,7 +2,10 @@ module github.com/opd-ai/go-ratox
 
 go 1.23.2
 
-require github.com/opd-ai/toxcore v0.0.0-20250906185026-f86512f409dd
+require (
+	github.com/opd-ai/toxcore v0.0.0-20250906185026-f86512f409dd
+	github.com/sirupsen/logrus v1.9.3
+)
 
 require (
 	github.com/flynn/noise v1.1.0 // indirect

@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -76,8 +80,24 @@ var DefaultBootstrapNodes = []BootstrapNode{
 // Load loads configuration from the specified directory
 // If the configuration file doesn't exist, it creates a default one
 func Load(configDir string) (*Config, error) {
+	pc, _, _, _ := runtime.Caller(0)
+	funcName := runtime.FuncForPC(pc).Name()
+	caller := funcName[strings.LastIndex(funcName, ".")+1:]
+
+	logrus.WithFields(logrus.Fields{
+		"caller":     caller,
+		"config_dir": configDir,
+		"operation":  "load_config",
+	}).Debug("Starting configuration load")
+
 	configFile := filepath.Join(configDir, ConfigFileName)
 	saveFile := filepath.Join(configDir, SaveDataFileName)
+
+	logrus.WithFields(logrus.Fields{
+		"caller":      caller,
+		"config_file": configFile,
+		"save_file":   saveFile,
+	}).Debug("Configuration file paths determined")
 
 	// Default configuration
 	cfg := &Config{
@@ -91,37 +111,120 @@ func Load(configDir string) (*Config, error) {
 		SaveFile:        saveFile,
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"caller":           caller,
+		"default_name":     cfg.Name,
+		"default_status":   cfg.StatusMessage,
+		"default_max_size": cfg.MaxFileSize,
+		"bootstrap_nodes":  len(cfg.BootstrapNodes),
+	}).Debug("Default configuration created")
+
 	// Try to load existing configuration
+	logrus.WithFields(logrus.Fields{
+		"caller":      caller,
+		"config_file": configFile,
+		"operation":   "read_existing_config",
+	}).Debug("Attempting to read existing configuration file")
+
 	if data, err := os.ReadFile(configFile); err == nil {
+		logrus.WithFields(logrus.Fields{
+			"caller":    caller,
+			"file_size": len(data),
+		}).Debug("Configuration file read successfully, parsing JSON")
+
 		if err := json.Unmarshal(data, cfg); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"caller": caller,
+				"error":  err,
+			}).Error("Failed to parse configuration file")
 			return nil, fmt.Errorf("failed to parse config file: %w", err)
 		}
+
+		logrus.WithFields(logrus.Fields{
+			"caller":             caller,
+			"loaded_name":        cfg.Name,
+			"loaded_debug":       cfg.Debug,
+			"loaded_auto_accept": cfg.AutoAcceptFiles,
+		}).Info("Existing configuration loaded successfully")
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"caller": caller,
+			"error":  err,
+		}).Info("No existing configuration file found, will create default")
 	}
 
 	// Ensure fields that aren't saved are set
 	cfg.ConfigDir = configDir
 	cfg.SaveFile = saveFile
 
+	logrus.WithFields(logrus.Fields{
+		"caller":     caller,
+		"config_dir": cfg.ConfigDir,
+		"save_file":  cfg.SaveFile,
+	}).Debug("Configuration fields updated")
+
 	// Save the configuration to ensure it exists
+	logrus.WithField("caller", caller).Debug("Saving configuration to ensure it exists")
 	if err := cfg.Save(); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"caller": caller,
+			"error":  err,
+		}).Error("Failed to save configuration")
 		return nil, fmt.Errorf("failed to save config: %w", err)
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"caller":     caller,
+		"config_dir": configDir,
+		"debug":      cfg.Debug,
+		"name":       cfg.Name,
+	}).Info("Configuration load completed successfully")
 
 	return cfg, nil
 }
 
 // Save saves the configuration to disk
 func (c *Config) Save() error {
+	pc, _, _, _ := runtime.Caller(0)
+	funcName := runtime.FuncForPC(pc).Name()
+	caller := funcName[strings.LastIndex(funcName, ".")+1:]
+
 	configFile := filepath.Join(c.ConfigDir, ConfigFileName)
+
+	logrus.WithFields(logrus.Fields{
+		"caller":      caller,
+		"config_file": configFile,
+		"operation":   "save_config",
+	}).Debug("Starting configuration save")
 
 	data, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"caller": caller,
+			"error":  err,
+		}).Error("Failed to marshal configuration to JSON")
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"caller":    caller,
+		"json_size": len(data),
+	}).Debug("Configuration marshaled to JSON successfully")
+
 	if err := os.WriteFile(configFile, data, 0600); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"caller":      caller,
+			"config_file": configFile,
+			"error":       err,
+		}).Error("Failed to write configuration file")
 		return fmt.Errorf("failed to write config file: %w", err)
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"caller":      caller,
+		"config_file": configFile,
+		"file_size":   len(data),
+	}).Info("Configuration saved successfully")
 
 	return nil
 }
