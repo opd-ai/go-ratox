@@ -400,6 +400,12 @@ func (fm *FIFOManager) handleFriendTextIn(friendID, message string) {
 		return
 	}
 
+	// Validate public key length to prevent buffer overflow
+	if len(publicKeyBytes) != 32 {
+		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+		return
+	}
+
 	var publicKey [32]byte
 	copy(publicKey[:], publicKeyBytes)
 
