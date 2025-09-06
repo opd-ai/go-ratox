@@ -4,14 +4,14 @@
 
 ~~~~
 **Total Issues Found:** 15
-**Resolved:** 13
-**Remaining:** 2
+**Resolved:** 14
+**Remaining:** 1
 
 - **CRITICAL BUG:** 3 → 3 resolved, 0 remaining  
 - **FUNCTIONAL MISMATCH:** 4 → 4 resolved, 0 remaining
 - **MISSING FEATURE:** 5 → 5 resolved, 0 remaining
 - **EDGE CASE BUG:** 2 → 2 resolved, 0 remaining
-- **PERFORMANCE ISSUE:** 1 → 0 resolved, 1 remaining
+- **PERFORMANCE ISSUE:** 1 → 1 resolved, 0 remaining
 
 **Resolved in this session:**
 - Buffer overflow in friend ID validation (#bug-1) - commit:313059f
@@ -27,6 +27,7 @@
 - Request message display (#bug-11) - already implemented
 - File transfer implementation (#bug-12) - commit:4fe6fbd
 - Connection status monitoring (#bug-13) - commit:43d948c
+- Inefficient FIFO polling (#bug-14) - commit:1b4cb04
 
 **Audit Methodology:**
 - Documentation analysis: README.md reviewed for functional requirements
@@ -361,11 +362,13 @@ func (c *Client) SendMessage(friendID uint32, message string, messageType toxcor
 ### PERFORMANCE ISSUE: Inefficient FIFO Polling
 **File:** client/fifo.go:208-233
 **Severity:** Medium
+**Status:** RESOLVED - 2025-09-06 - commit:1b4cb04
 **Description:** FIFO monitoring uses busy-wait polling with 100ms sleep, inefficient for high-throughput scenarios
 **Expected Behavior:** Should use event-driven I/O (epoll/kqueue) or inotify for efficient FIFO monitoring  
 **Actual Behavior:** Constant CPU usage from polling loops even when idle
 **Impact:** Unnecessary CPU consumption, reduced battery life, poor scalability
 **Reproduction:** Monitor CPU usage with client idle - should be near 0% but shows continuous activity
+**Fix Applied:** Replaced busy polling with blocking I/O using separate goroutines per FIFO, eliminating unnecessary CPU usage when idle
 **Code Reference:**
 ```go
 func (fm *FIFOManager) monitorGlobalFIFOs(ctx context.Context) {
