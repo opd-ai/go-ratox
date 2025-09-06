@@ -10,7 +10,7 @@ import (
 
 const (
 	// ConfigFileName is the name of the configuration file
-	ConfigFileName = "ratox.json"
+	ConfigFileName = "config.json"
 	// SaveDataFileName is the name of the Tox save data file
 	SaveDataFileName = "ratox.tox"
 )
