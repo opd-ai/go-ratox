@@ -337,8 +337,10 @@ func (c *Client) SendMessage(friendID uint32, message string, messageType toxcor
 		return fmt.Errorf("message cannot be empty")
 	}
 
-	if len(message) > 1372 {
-		return fmt.Errorf("message too long (max 1372 bytes)")
+	// Check byte length, not character count, for UTF-8 messages
+	messageBytes := []byte(message)
+	if len(messageBytes) > 1372 {
+		return fmt.Errorf("message too long (max 1372 bytes, got %d)", len(messageBytes))
 	}
 
 	return c.tox.SendFriendMessage(friendID, message, messageType)
