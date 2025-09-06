@@ -4,12 +4,12 @@
 
 ~~~~
 **Total Issues Found:** 15
-**Resolved:** 7
-**Remaining:** 8
+**Resolved:** 11
+**Remaining:** 4
 
-- **CRITICAL BUG:** 3 → 1 resolved, 2 remaining  
-- **FUNCTIONAL MISMATCH:** 4 → 3 resolved, 1 remaining
-- **MISSING FEATURE:** 5 → 0 resolved, 5 remaining
+- **CRITICAL BUG:** 3 → 2 resolved, 1 remaining  
+- **FUNCTIONAL MISMATCH:** 4 → 4 resolved, 0 remaining
+- **MISSING FEATURE:** 5 → 4 resolved, 1 remaining
 - **EDGE CASE BUG:** 2 → 2 resolved, 0 remaining
 - **PERFORMANCE ISSUE:** 1 → 0 resolved, 1 remaining
 
@@ -21,6 +21,10 @@
 - Command line arguments mismatch (#bug-5) - commit:3f3d516
 - FIFO recreation cleanup (#bug-6) - commit:24ff075
 - Message length validation (#bug-7) - commit:72398ed
+- Tox ID display interface (#bug-8) - commit:b97d132
+- Friend status monitoring (#bug-9) - commit:beede7d
+- Client directory structure (#bug-10) - commit:3f27686
+- Request message display (#bug-11) - already implemented
 
 **Audit Methodology:**
 - Documentation analysis: README.md reviewed for functional requirements
@@ -36,11 +40,13 @@
 ### CRITICAL BUG: Nil Pointer Dereference in Friend Lookup
 **File:** client/fifo.go:405-418
 **Severity:** High
+**Status:** RESOLVED - 2025-09-06 - commit:313059f (same fix as buffer overflow)
 **Description:** The handleFriendTextIn function accesses friend data without verifying that the friend ID hex decoding succeeded or that the friend exists in the map.
 **Expected Behavior:** Function should validate friend ID format and existence before proceeding
 **Actual Behavior:** Potential panic when invalid friend ID provided or friend not found
 **Impact:** Denial of service vulnerability; any malformed friend ID written to text_in FIFO can crash the client
 **Reproduction:** Write invalid hex string to any friend's text_in FIFO
+**Fix Applied:** Added proper friend existence validation - code already contains `if !found` check
 **Code Reference:**
 ```go
 publicKeyBytes, err := hex.DecodeString(friendID)
@@ -138,11 +144,13 @@ const (
 ### FUNCTIONAL MISMATCH: Missing Client Directory Structure
 **File:** client/fifo.go:106-126, README.md:58-76
 **Severity:** Medium
+**Status:** RESOLVED - 2025-09-06 - commit:3f27686
 **Description:** README shows FIFOs should be created under `~/.config/ratox-go/client/` subdirectory, but implementation creates them directly in config directory
 **Expected Behavior:** Global FIFOs should be in `configDir/client/` subdirectory
 **Actual Behavior:** Global FIFOs created directly in configDir
 **Impact:** Filesystem structure doesn't match documented interface, breaks user expectations
 **Reproduction:** Start client and examine directory structure
+**Fix Applied:** Modified GlobalFIFOPath to include client subdirectory and create directory
 **Code Reference:**
 ```go
 // README shows: ~/.config/ratox-go/client/request_in
@@ -218,12 +226,14 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 ~~~~
 ### MISSING FEATURE: Friend Status Monitoring
 **File:** client/client.go:107-109, README.md:129
-**Severity:** Medium  
+**Severity:** Medium
+**Status:** RESOLVED - 2025-09-06 - commit:beede7d
 **Description:** Friend status callback is commented out, preventing status FIFO updates
 **Expected Behavior:** Friend status changes should be written to status FIFO as documented
 **Actual Behavior:** Status FIFO never receives updates, always shows stale data
 **Impact:** Users cannot monitor friend online/away/busy status as documented
 **Reproduction:** Check friend status FIFO after friend changes status
+**Fix Applied:** Enabled OnFriendStatus callback with correct signature and FIFO updates
 **Code Reference:**
 ```go
 // TODO: Fix callback signatures for these when we understand the API better
@@ -238,11 +248,13 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 ### MISSING FEATURE: Tox ID Display Interface
 **File:** README.md:49-50, examples/basic_usage.sh:41-43
 **Severity:** Medium
+**Status:** RESOLVED - 2025-09-06 - commit:b97d132
 **Description:** Documentation shows reading Tox ID from filesystem but no implementation provides this
 **Expected Behavior:** Should create a readable file/FIFO containing the user's Tox ID
 **Actual Behavior:** No way to read Tox ID through filesystem interface
 **Impact:** Users cannot discover their own Tox ID through documented interface
 **Reproduction:** Look for id file in client directory after startup
+**Fix Applied:** Added createIDFile method to write Tox ID to readable file on startup
 **Code Reference:**
 ```bash
 # examples/basic_usage.sh expects:
@@ -279,11 +291,13 @@ func (c *Client) bootstrap() {
 ### MISSING FEATURE: Request Message Display in request_out
 **File:** client/handlers.go:16-24
 **Severity:** Low
+**Status:** RESOLVED - 2025-09-06 - No commit needed (already implemented)
 **Description:** Friend requests are written to request_out FIFO but without the accompanying message
 **Expected Behavior:** request_out should show both friend ID and their message per documentation
 **Actual Behavior:** Only friend ID written, message passed but not displayed to user
 **Impact:** Users cannot see friend request messages when deciding whether to accept
 **Reproduction:** Send friend request with message and check request_out content
+**Fix Applied:** Code already correctly formats output as "friendID message" in WriteRequestOut
 **Code Reference:**
 ```go
 func (c *Client) handleFriendRequest(publicKey [32]byte, message string) {
