@@ -107,6 +107,12 @@ func (fm *FIFOManager) Run(ctx context.Context) {
 
 // createGlobalFIFOs creates the global FIFO files
 func (fm *FIFOManager) createGlobalFIFOs() error {
+	// Create client subdirectory for global FIFOs
+	clientDir := filepath.Join(fm.config.ConfigDir, "client")
+	if err := os.MkdirAll(clientDir, DirPerm); err != nil {
+		return fmt.Errorf("failed to create client directory: %w", err)
+	}
+
 	globalFIFOs := []struct {
 		name     string
 		isInput  bool

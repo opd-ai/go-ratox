@@ -133,7 +133,7 @@ func (c *Config) FriendDir(friendID string) string {
 
 // GlobalFIFOPath returns the path for a global FIFO file
 func (c *Config) GlobalFIFOPath(name string) string {
-	return filepath.Join(c.ConfigDir, name)
+	return filepath.Join(c.ConfigDir, "client", name)
 }
 
 // FriendFIFOPath returns the path for a friend-specific FIFO file
