@@ -297,63 +297,111 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 
 // monitorGlobalFIFOs monitors global FIFO files for input
 func (fm *FIFOManager) monitorGlobalFIFOs(ctx context.Context) {
+	// Monitor each FIFO in a separate goroutine to avoid busy polling
+	var wg sync.WaitGroup
+
+	// Monitor request_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fm.monitorSingleFIFO(ctx, fm.config.GlobalFIFOPath(RequestIn), fm.handleRequestIn)
+	}()
+
+	// Monitor name
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fm.monitorSingleFIFO(ctx, fm.config.GlobalFIFOPath(Name), fm.handleNameChange)
+	}()
+
+	// Monitor status_message
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fm.monitorSingleFIFO(ctx, fm.config.GlobalFIFOPath(StatusMessage), fm.handleStatusMessageChange)
+	}()
+
+	// Wait for all monitoring goroutines to finish
+	wg.Wait()
+}
+
+// monitorSingleFIFO monitors a single FIFO with blocking reads to avoid busy polling
+func (fm *FIFOManager) monitorSingleFIFO(ctx context.Context, path string, handler func(string)) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			// Monitor request_in
-			if err := fm.readFIFO(ctx, fm.config.GlobalFIFOPath(RequestIn), fm.handleRequestIn); err != nil {
-				if fm.config.Debug {
-					log.Printf("Error reading request_in: %v", err)
-				}
-			}
+		}
 
-			// Monitor name
-			if err := fm.readFIFO(ctx, fm.config.GlobalFIFOPath(Name), fm.handleNameChange); err != nil {
-				if fm.config.Debug {
-					log.Printf("Error reading name: %v", err)
-				}
+		// Use blocking read to avoid busy polling
+		if err := fm.readFIFOBlocking(ctx, path, handler); err != nil {
+			if fm.config.Debug {
+				log.Printf("Error reading FIFO %s: %v", path, err)
 			}
+			// Brief sleep before retrying to avoid rapid error loops
+			time.Sleep(1 * time.Second)
+		}
+	}
+}
 
-			// Monitor status_message
-			if err := fm.readFIFO(ctx, fm.config.GlobalFIFOPath(StatusMessage), fm.handleStatusMessageChange); err != nil {
-				if fm.config.Debug {
-					log.Printf("Error reading status_message: %v", err)
-				}
+// readFIFOBlocking reads from a FIFO with blocking I/O
+func (fm *FIFOManager) readFIFOBlocking(ctx context.Context, path string, handler func(string)) error {
+	// Open FIFO for reading (blocking mode)
+	file, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		// ReadString blocks until data is available or EOF
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				// FIFO was closed (writer disconnected), need to reopen
+				return nil
 			}
+			return err
+		}
 
-			time.Sleep(100 * time.Millisecond)
+		line = strings.TrimSpace(line)
+		if line != "" {
+			handler(line)
 		}
 	}
 }
 
 // monitorFriendFIFOs monitors FIFO files for a specific friend
 func (fm *FIFOManager) monitorFriendFIFOs(ctx context.Context, friendID string) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			// Monitor text_in
-			textInPath := fm.config.FriendFIFOPath(friendID, TextIn)
-			if err := fm.readFIFO(ctx, textInPath, func(data string) { fm.handleFriendTextIn(friendID, data) }); err != nil {
-				if fm.config.Debug {
-					log.Printf("Error reading text_in for %s: %v", friendID, err)
-				}
-			}
+	// Monitor each friend FIFO in a separate goroutine to avoid busy polling
+	var wg sync.WaitGroup
 
-			// Monitor file_in
-			fileInPath := fm.config.FriendFIFOPath(friendID, FileIn)
-			if err := fm.readFIFO(ctx, fileInPath, func(data string) { fm.handleFriendFileIn(friendID, data) }); err != nil {
-				if fm.config.Debug {
-					log.Printf("Error reading file_in for %s: %v", friendID, err)
-				}
-			}
+	// Monitor text_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		textInPath := fm.config.FriendFIFOPath(friendID, TextIn)
+		fm.monitorSingleFIFO(ctx, textInPath, func(data string) { fm.handleFriendTextIn(friendID, data) })
+	}()
 
-			time.Sleep(100 * time.Millisecond)
-		}
-	}
+	// Monitor file_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fileInPath := fm.config.FriendFIFOPath(friendID, FileIn)
+		fm.monitorSingleFIFO(ctx, fileInPath, func(data string) { fm.handleFriendFileIn(friendID, data) })
+	}()
+
+	// Wait for all monitoring goroutines to finish
+	wg.Wait()
 }
 
 // readFIFO reads data from a FIFO and calls the handler function

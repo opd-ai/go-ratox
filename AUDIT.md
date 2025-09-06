@@ -4,8 +4,8 @@
 
 ~~~~
 **Total Issues Found:** 15
-**Resolved:** 12
-**Remaining:** 3
+**Resolved:** 13
+**Remaining:** 2
 
 - **CRITICAL BUG:** 3 → 3 resolved, 0 remaining  
 - **FUNCTIONAL MISMATCH:** 4 → 4 resolved, 0 remaining
@@ -26,6 +26,7 @@
 - Client directory structure (#bug-10) - commit:3f27686
 - Request message display (#bug-11) - already implemented
 - File transfer implementation (#bug-12) - commit:4fe6fbd
+- Connection status monitoring (#bug-13) - commit:43d948c
 
 **Audit Methodology:**
 - Documentation analysis: README.md reviewed for functional requirements
@@ -271,11 +272,13 @@ if [ -f "$CLIENT_DIR/id" ]; then
 ### MISSING FEATURE: Connection Status and DHT Information  
 **File:** README.md:316-336, client/client.go:223-232
 **Severity:** Medium
+**Status:** RESOLVED - 2025-09-06 - commit:43d948c
 **Description:** Documentation mentions connection status and debug output but no filesystem interface provided
 **Expected Behavior:** Should provide readable files showing connection status, peer count, DHT information
 **Actual Behavior:** Only debug logging to console, no filesystem interface for status
 **Impact:** Users cannot monitor connection health through documented interface
 **Reproduction:** Look for connection status files after client connects to DHT
+**Fix Applied:** Added connection_status file with periodic updates showing connection state, total friends, and online friends count
 **Code Reference:**
 ```go
 // bootstrap connects to DHT but provides no status interface
