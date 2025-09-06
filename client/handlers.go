@@ -73,15 +73,18 @@ func (c *Client) handleFriendNameChange(friendID uint32, name string) {
 			toxFriends := c.tox.GetFriends()
 			if toxFriend, ok := toxFriends[friendID]; ok {
 				friend.PublicKey = toxFriend.PublicKey
-				// Create FIFOs now that we have the public key
-				friendIDStr := hex.EncodeToString(friend.PublicKey[:])
-				if err := c.fifoManager.CreateFriendFIFOs(friendIDStr); err != nil {
-					log.Printf("Warning: failed to create FIFOs for friend %s: %v", friendIDStr, err)
-				}
 			}
 		}
 	}
 	c.friendsMu.Unlock()
+
+	// Create FIFOs outside the lock to prevent deadlock
+	if exists && friend.PublicKey != ([32]byte{}) {
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		if err := c.fifoManager.CreateFriendFIFOs(friendIDStr); err != nil {
+			log.Printf("Warning: failed to create FIFOs for friend %s: %v", friendIDStr, err)
+		}
+	}
 
 	if c.config.Debug && exists {
 		log.Printf("Friend %d changed name to: %s", friendID, name)
