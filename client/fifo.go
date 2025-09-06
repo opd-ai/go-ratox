@@ -4,6 +4,7 @@ package client
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -496,11 +497,73 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	}
 
 	log.Printf("File transfer request for %s: %s", friendID, filePath)
-	// TODO: Implement file transfer initiation
-	// This would involve:
-	// 1. Opening the file and getting its size
-	// 2. Calling tox.FileSend to initiate the transfer
-	// 3. Managing the file transfer state
+
+	// Find friend by public key
+	publicKeyBytes, err := hex.DecodeString(friendID)
+	if err != nil {
+		log.Printf("Invalid friend ID: %v", err)
+		return
+	}
+
+	if len(publicKeyBytes) != 32 {
+		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+		return
+	}
+
+	var publicKey [32]byte
+	copy(publicKey[:], publicKeyBytes)
+
+	// Find friend
+	var friendNum uint32
+	var found bool
+	fm.client.friendsMu.RLock()
+	for _, friend := range fm.client.friends {
+		if friend.PublicKey == publicKey {
+			friendNum = friend.ID
+			found = true
+			break
+		}
+	}
+	fm.client.friendsMu.RUnlock()
+
+	if !found {
+		log.Printf("Friend not found: %s", friendID)
+		return
+	}
+
+	// Check if file exists and get its size
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		log.Printf("File not found or inaccessible: %v", err)
+		return
+	}
+
+	if fileInfo.IsDir() {
+		log.Printf("Cannot send directory: %s", filePath)
+		return
+	}
+
+	fileSize := uint64(fileInfo.Size())
+
+	// Check file size limits
+	if fm.client.config.MaxFileSize > 0 && int64(fileSize) > fm.client.config.MaxFileSize {
+		log.Printf("File too large (%d bytes), maximum allowed: %d", fileSize, fm.client.config.MaxFileSize)
+		return
+	}
+
+	// Generate file ID (use first 32 bytes of file path hash for simplicity)
+	h := sha256.Sum256([]byte(filePath))
+	fileID := h
+
+	// Start file transfer
+	filename := filepath.Base(filePath)
+	transferID, err := fm.client.tox.FileSend(friendNum, 0, fileSize, fileID, filename)
+	if err != nil {
+		log.Printf("Failed to initiate file transfer: %v", err)
+		return
+	}
+
+	log.Printf("File transfer initiated: %s (%d bytes) to friend %d, transfer ID: %d", filename, fileSize, friendNum, transferID)
 }
 
 // Write functions for output FIFOs

@@ -155,8 +155,12 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 
 	// Auto-accept files if configured
 	if c.config.AutoAcceptFiles {
-		// TODO: Implement file control accept
-		log.Printf("Auto-accepted file transfer: %s", filename)
+		// Use FileControl to accept the transfer
+		if err := c.tox.FileControl(friendID, fileNumber, 0); err != nil { // 0 = FileControlResume
+			log.Printf("Failed to accept file transfer: %v", err)
+		} else {
+			log.Printf("Auto-accepted file transfer: %s", filename)
+		}
 	}
 }
 
@@ -172,8 +176,13 @@ func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, posi
 		}
 	}
 
-	// TODO: Implement file chunk writing to disk
-	// This would involve maintaining file transfer state and writing chunks to files
+	// Basic implementation: For now, just log the received chunk
+	// In a full implementation, this would write chunks to a file
+	if len(data) == 0 {
+		log.Printf("File transfer completed for file %d from friend %d", fileNumber, friendID)
+	} else {
+		log.Printf("Received file chunk: %d bytes at position %d", len(data), position)
+	}
 }
 
 // handleFileChunkRequest processes outgoing file chunk requests
@@ -189,5 +198,9 @@ func (c *Client) handleFileChunkRequest(friendID uint32, fileNumber uint32, posi
 	}
 
 	// TODO: Implement file chunk reading and sending
-	// This would involve reading the requested chunk from disk and sending it
+	// For now, send empty chunk to indicate transfer completion
+	// In a full implementation, this would read from the actual file
+	if err := c.tox.FileSendChunk(friendID, fileNumber, position, nil); err != nil {
+		log.Printf("Failed to send file chunk: %v", err)
+	}
 }
