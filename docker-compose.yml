@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  ratox-go:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: opdai/ratox-go:latest
+    container_name: ratox-go
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - RATOX_CONFIG_DIR=/home/ratox/.config/ratox-go
+    
+    # Volumes for persistent data
+    volumes:
+      - ratox_config:/home/ratox/.config/ratox-go
+      - ratox_logs:/var/log/ratox-go
+    
+    # Network configuration
+    networks:
+      - ratox_network
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+          cpus: '0.5'
+        reservations:
+          memory: 50M
+          cpus: '0.1'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "pgrep", "ratox-go"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=50m
+    
+    # User and group
+    user: "1000:1000"
+
+  # Optional: Web interface (if implemented)
+  ratox-web:
+    image: opdai/ratox-web:latest
+    container_name: ratox-web
+    restart: unless-stopped
+    depends_on:
+      - ratox-go
+    
+    ports:
+      - "8080:8080"
+    
+    environment:
+      - RATOX_CONFIG_DIR=/ratox-config
+    
+    volumes:
+      - ratox_config:/ratox-config:ro
+    
+    networks:
+      - ratox_network
+    
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: '0.2'
+
+  # Log aggregator
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: ratox-logs
+    restart: unless-stopped
+    depends_on:
+      - ratox-go
+    
+    volumes:
+      - ratox_logs:/var/log/ratox-go:ro
+      - ./docker/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+    
+    networks:
+      - ratox_network
+    
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: '0.1'
+
+volumes:
+  ratox_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/config
+  
+  ratox_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/logs
+
+networks:
+  ratox_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

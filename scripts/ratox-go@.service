@@ -1,0 +1,30 @@
+[Unit]
+Description=ratox-go Tox FIFO client
+Documentation=https://github.com/opd-ai/go-ratox
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/home/%i
+ExecStart=/usr/local/bin/ratox-go -p /home/%i/.config/ratox-go
+Restart=always
+RestartSec=5
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/home/%i/.config/ratox-go
+
+# Resource limits
+LimitNOFILE=1024
+MemoryLimit=100M
+
+# Environment
+Environment=HOME=/home/%i
+
+[Install]
+WantedBy=multi-user.target
