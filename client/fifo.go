@@ -50,6 +50,7 @@ const (
 	RequestOut    = "request_out"    // Read-only - incoming friend requests
 	Name          = "name"           // Write-only - set display name
 	StatusMessage = "status_message" // Write-only - set status message
+	ID            = "id"             // Read-only - Tox ID file
 
 	// Friend-specific FIFOs
 	TextIn  = "text_in"  // Write-only - send messages
@@ -122,6 +123,11 @@ func (fm *FIFOManager) createGlobalFIFOs() error {
 		if err := fm.createFIFO(path, fifo.isInput, fifo.isOutput); err != nil {
 			return fmt.Errorf("failed to create FIFO %s: %w", fifo.name, err)
 		}
+	}
+
+	// Create ID file with Tox ID
+	if err := fm.createIDFile(); err != nil {
+		return fmt.Errorf("failed to create ID file: %w", err)
 	}
 
 	return nil
@@ -212,6 +218,22 @@ func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
 
 	if fm.config.Debug {
 		log.Printf("Created FIFO: %s (input: %v, output: %v)", path, isInput, isOutput)
+	}
+
+	return nil
+}
+
+// createIDFile creates a file containing the Tox ID for user reference
+func (fm *FIFOManager) createIDFile() error {
+	idPath := fm.config.GlobalFIFOPath(ID)
+	toxID := fm.client.GetToxID()
+
+	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0644); err != nil {
+		return fmt.Errorf("failed to write ID file: %w", err)
+	}
+
+	if fm.config.Debug {
+		log.Printf("Created ID file: %s", idPath)
 	}
 
 	return nil
