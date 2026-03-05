@@ -447,9 +447,22 @@ Implementation:
    - Tor and I2P require TCP mode (UDP is automatically disabled when either is active).
    - Warn and continue without the overlay network if the configured SOCKS5 or SAM address is unreachable, falling back to direct TCP/UDP connectivity.
 
-#### Step 4.6: Bootstrap Node Mode
+#### Step 4.6: Bootstrap Node Mode ❌ (Blocked)
+
+**Status:** BLOCKED — toxcore API limitation
 
 **Goal:** Allow go-ratox to act as a DHT bootstrap and relay node for other Tox clients.
+
+**Limitations (toxcore API gaps):**
+- **No DHT server APIs**: The current toxcore Go library only exposes client-side `Bootstrap()` method to connect to existing bootstrap nodes. There are no APIs to:
+  - Start a DHT server/node
+  - Listen for incoming DHT requests
+  - Serve DHT node discovery responses
+  - Act as a TCP relay server
+- The `Options` struct only has `TCPPort` for client-side listening, not for serving as a bootstrap/relay node
+- No methods exist for advertising the node's public key and address to the network
+
+**When toxcore adds DHT server support, implement:**
 
 1. Add bootstrap node configuration fields to `Config`:
    ```go
@@ -473,18 +486,36 @@ Implementation:
 
 ### Phase 5: Robustness & Quality
 
-#### Step 5.1: Add Client Package Tests
+#### Step 5.1: Add Client Package Tests ✅
+
+**Status:** COMPLETE
 
 **Goal:** Add unit tests for client logic.
 
-1. Create `client/client_test.go` with tests for:
+Implementation:
+1. ✅ Created `client/client_test.go` with comprehensive tests for:
    - `SendMessage` validation (empty, too long, UTF-8 byte counting)
-   - Friend map operations (add, get, accept)
-   - Name/status message updates
-2. Create `client/fifo_test.go` with tests for:
-   - FIFO path generation
-   - Input parsing (Tox ID formats, message types)
-   - Handler dispatching
+   - Friend map concurrent access operations (add, get, update, delete)
+   - `GetFriend` method
+   - Message type handling (normal vs action)
+   - Friend struct status values and validation
+   - Client struct initialization
+   - Transfer key generation patterns
+   - Conference struct
+2. ✅ Created `client/fifo_test.go` with comprehensive tests for:
+   - FIFO path generation (global, friend, conference)
+   - Friend directory path generation
+   - Conference directory and FIFO path generation
+   - Tox ID parsing and validation (76-character hex format)
+   - Message type detection (/me action prefix)
+   - FIFO constant values
+   - FIFO permission constants
+   - FIFO struct properties
+   - Input parsing patterns (trimming whitespace)
+   - Friend removal confirmation logic
+   - Path joining behavior
+3. ✅ All tests pass with race detection
+4. ✅ Zero regression in complexity, duplication, or doc coverage
 
 #### Step 5.2: Improve Error Handling in File Transfers
 
