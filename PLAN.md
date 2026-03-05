@@ -1,0 +1,422 @@
+# PLAN.md — go-ratox Implementation Completion Plan
+
+This document provides a step-by-step plan to resolve all implementation gaps in go-ratox and complete the client, based on the toxcore API available at commit `521bbdf2a2a389ddc7933cd3898dd99fd1f5b28e`.
+
+## Current State
+
+go-ratox is a FIFO-based Tox client that exposes the Tox messaging protocol through a filesystem interface using named pipes. The core FIFO framework, friend management, text messaging, and basic file transfer initiation are implemented. The dependency has been updated to use `github.com/opd-ai/toxcore v0.0.0-20260305025602-521bbdf2a2a3`.
+
+## Implementation Gaps
+
+The following gaps have been identified by auditing the go-ratox client against the toxcore API surface:
+
+### Gap 1: File Transfer — Incomplete Chunk Handling
+
+**Status:** Partial — file send initiation works, but receive/send chunk handling is stubbed.
+
+**Files:** `client/handlers.go`
+
+**Details:**
+- `handleFileReceiveChunk` only logs received chunks; it does not write data to disk.
+- `handleFileChunkRequest` sends a nil chunk (signaling EOF) immediately instead of reading and sending the actual file data.
+- No tracking of active outgoing file transfers (file path → transfer ID mapping).
+- No tracking of active incoming file transfers (transfer ID → output file mapping).
+
+### Gap 2: File Transfer — Rejection of Oversized Files
+
+**Status:** Missing — the code logs "rejecting" for oversized files but does not call `FileControl` with `FileControlCancel`.
+
+**Files:** `client/handlers.go:144`
+
+### Gap 3: Friend Connection Status Tracking
+
+**Status:** Missing — `OnFriendConnectionStatus` callback is not registered.
+
+**Files:** `client/client.go`
+
+**Details:**
+- The toxcore API provides `OnFriendConnectionStatus(func(friendID uint32, connectionStatus ConnectionStatus))` which fires when a friend transitions between None/TCP/UDP.
+- go-ratox only registers `OnFriendStatus` (away/busy/online), but does not track the actual connection status (online/offline).
+- The `Friend.Online` field is never updated.
+
+### Gap 4: Friend Deletion
+
+**Status:** Missing — no filesystem interface to remove a friend.
+
+**Files:** `client/client.go`, `client/fifo.go`
+
+**Details:**
+- The toxcore API provides `DeleteFriend(friendID uint32) error`.
+- go-ratox has no FIFO or mechanism to trigger friend deletion.
+- Deleting a friend should also clean up their FIFO directory.
+
+### Gap 5: Typing Notifications
+
+**Status:** Missing — `OnFriendTyping` callback not registered; no outgoing typing support.
+
+**Files:** `client/client.go`, `client/handlers.go`, `client/fifo.go`
+
+**Details:**
+- The toxcore API provides `OnFriendTyping(func(friendID uint32, isTyping bool))` and `SetTyping(friendID uint32, isTyping bool) error`.
+- go-ratox does not surface typing indicators to the filesystem.
+
+### Gap 6: Friend Status Message Change Callback
+
+**Status:** Missing — `OnFriendStatusMessage` callback not registered.
+
+**Files:** `client/client.go`, `client/handlers.go`
+
+**Details:**
+- The toxcore API provides `OnFriendStatusMessage(func(friendID uint32, statusMessage string))`.
+- Friend status message changes are not captured or written to the filesystem.
+
+### Gap 7: Self Connection Status Callback
+
+**Status:** Missing — `OnConnectionStatus` callback not registered.
+
+**Files:** `client/client.go`
+
+**Details:**
+- The toxcore API provides `OnConnectionStatus(func(status ConnectionStatus))`.
+- go-ratox polls `SelfGetConnectionStatus()` periodically instead of reacting to events.
+
+### Gap 8: Use `NewFromSavedata` for Loading Saved State
+
+**Status:** Suboptimal — go-ratox manually passes `SavedataData`/`SavedataType` in Options.
+
+**Files:** `client/client.go`
+
+**Details:**
+- The toxcore API provides `NewFromSavedata(options *Options, savedata []byte)` which properly restores the full Tox state including friends list, name, and status message.
+- go-ratox currently sets `options.SavedataType = toxcore.SaveDataTypeToxSave` and `options.SavedataData = saveData` then calls `New(options)`. This may not restore all state correctly with the new toxcore.
+
+### Gap 9: Use `IterationInterval()` for Dynamic Tick Rate
+
+**Status:** Suboptimal — hardcoded 50ms tick.
+
+**Files:** `client/client.go:237`
+
+**Details:**
+- The toxcore API provides `IterationInterval() time.Duration` to get the recommended interval between `Iterate()` calls.
+- go-ratox hardcodes `50 * time.Millisecond`.
+
+### Gap 10: Conference/Group Chat Support
+
+**Status:** Missing — not implemented at all.
+
+**Files:** N/A (new feature)
+
+**Details:**
+- The toxcore API provides `ConferenceNew()`, `ConferenceInvite()`, `ConferenceSendMessage()`.
+- go-ratox has no group chat support.
+
+### Gap 11: Async Messaging (Offline Messages)
+
+**Status:** Missing — not exposed through FIFO interface.
+
+**Files:** N/A (new feature)
+
+**Details:**
+- The toxcore API provides `OnAsyncMessage` callback and `IsAsyncMessagingAvailable()`.
+- Async messages sent to offline friends are queued and delivered when they come online.
+- go-ratox does not register for or surface async message events.
+
+### Gap 12: Friend `remove_in` FIFO for Deletion
+
+**Status:** Missing — no way to remove friends through the FIFO interface.
+
+**Files:** `client/fifo.go`
+
+---
+
+## Step-by-Step Completion Plan
+
+### Phase 1: Critical Fixes (Core Functionality)
+
+These steps fix broken or incomplete core features.
+
+#### Step 1.1: Complete File Receive Chunk Handling
+
+**Goal:** Write incoming file data to disk instead of just logging.
+
+1. Add a `fileTransfers` map to `Client` tracking active incoming transfers:
+   ```go
+   type incomingTransfer struct {
+       File     *os.File
+       Filename string
+       FileSize uint64
+       Received uint64
+   }
+   incomingTransfers map[string]*incomingTransfer // key: "friendID:fileNumber"
+   ```
+2. In `handleFileReceive`, create a destination file in the friend's directory when a transfer is accepted.
+3. In `handleFileReceiveChunk`, write chunk data to the destination file at the correct position.
+4. When `data` is empty (transfer complete), close the file and notify via `file_out` FIFO.
+
+#### Step 1.2: Complete File Send Chunk Handling
+
+**Goal:** Read file data from disk and send chunks when requested.
+
+1. Add an `outgoingTransfers` map to `Client` tracking active outgoing transfers:
+   ```go
+   type outgoingTransfer struct {
+       File     *os.File
+       Filename string
+       FileSize uint64
+       Sent     uint64
+   }
+   outgoingTransfers map[string]*outgoingTransfer // key: "friendID:fileNumber"
+   ```
+2. In `handleFriendFileIn` (after `FileSend` succeeds), register the outgoing transfer.
+3. In `handleFileChunkRequest`, read `length` bytes from the file at `position` and call `FileSendChunk`.
+4. When `length` is 0, the transfer is complete — close the file and clean up.
+
+#### Step 1.3: Implement File Transfer Rejection
+
+**Goal:** Properly reject oversized file transfers.
+
+1. In `handleFileReceive`, when file size exceeds `MaxFileSize`:
+   ```go
+   c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel)
+   ```
+2. Log the rejection and notify via `file_out` FIFO.
+
+### Phase 2: Connection & Status Tracking
+
+These steps ensure go-ratox accurately tracks friend and self connection state.
+
+#### Step 2.1: Register `OnFriendConnectionStatus` Callback
+
+**Goal:** Track when friends come online or go offline.
+
+1. In `setupCallbacks`, add:
+   ```go
+   c.tox.OnFriendConnectionStatus(func(friendID uint32, status toxcore.ConnectionStatus) {
+       c.handleFriendConnectionStatusChange(friendID, status)
+   })
+   ```
+2. Implement `handleFriendConnectionStatusChange` in `handlers.go`:
+   - Update `friend.Online` based on `status != ConnectionNone`.
+   - Write connection status to friend's `status` FIFO.
+   - Log the change in debug mode.
+
+#### Step 2.2: Register `OnConnectionStatus` Callback
+
+**Goal:** React to self connection status changes instead of polling.
+
+1. In `setupCallbacks`, add:
+   ```go
+   c.tox.OnConnectionStatus(func(status toxcore.ConnectionStatus) {
+       c.handleSelfConnectionStatusChange(status)
+   })
+   ```
+2. Implement `handleSelfConnectionStatusChange` to update the connection status file immediately.
+
+#### Step 2.3: Register `OnFriendStatusMessage` Callback
+
+**Goal:** Track when friends change their status message.
+
+1. In `setupCallbacks`, add:
+   ```go
+   c.tox.OnFriendStatusMessage(func(friendID uint32, statusMessage string) {
+       c.handleFriendStatusMessageChange(friendID, statusMessage)
+   })
+   ```
+2. Write the updated status message to a `status_message` file in the friend's directory.
+
+### Phase 3: Use Improved toxcore APIs
+
+These steps adopt better APIs available in the updated toxcore.
+
+#### Step 3.1: Use `NewFromSavedata` for State Restoration
+
+**Goal:** Properly restore full Tox state from save data.
+
+1. Modify `initTox()` in `client.go`:
+   ```go
+   if saveData, err := os.ReadFile(c.config.SaveFile); err == nil {
+       tox, err := toxcore.NewFromSavedata(options, saveData)
+       if err != nil {
+           return fmt.Errorf("failed to restore Tox from savedata: %w", err)
+       }
+       c.tox = tox
+   } else {
+       tox, err := toxcore.New(options)
+       if err != nil {
+           return fmt.Errorf("failed to create Tox instance: %w", err)
+       }
+       c.tox = tox
+   }
+   ```
+2. After `NewFromSavedata`, the friend list, name, and status are already restored — skip manual re-setting if present.
+
+#### Step 3.2: Use `IterationInterval()` for Dynamic Tick Rate
+
+**Goal:** Use toxcore's recommended iteration interval.
+
+1. In the main loop in `Run()`, replace the hardcoded ticker:
+   ```go
+   for {
+       select {
+       case <-c.ctx.Done():
+           return nil
+       case <-c.shutdown:
+           return nil
+       default:
+           c.tox.Iterate()
+           time.Sleep(c.tox.IterationInterval())
+       }
+   }
+   ```
+
+#### Step 3.3: Use `FriendByPublicKey` for Lookups
+
+**Goal:** Use toxcore's built-in friend lookup instead of iterating the map.
+
+1. Replace manual friend-by-public-key lookups in `fifo.go` (`handleFriendTextIn`, `handleFriendFileIn`) with:
+   ```go
+   friendNum, err := c.client.tox.FriendByPublicKey(publicKey)
+   ```
+2. This avoids iterating `c.friends` while holding a read lock.
+
+### Phase 4: New Features
+
+These steps add new capabilities exposed by the updated toxcore.
+
+#### Step 4.1: Friend Deletion Support
+
+**Goal:** Allow users to remove friends through the filesystem interface.
+
+1. Add a `remove_in` FIFO to each friend's directory.
+2. Monitor `remove_in` — when a friend's public key or "confirm" is written:
+   - Call `c.tox.DeleteFriend(friendID)`.
+   - Remove the friend from `c.friends`.
+   - Clean up the friend's FIFO directory.
+   - Save Tox state.
+
+#### Step 4.2: Typing Notifications
+
+**Goal:** Surface typing indicators through the filesystem.
+
+1. Register `OnFriendTyping` callback:
+   ```go
+   c.tox.OnFriendTyping(func(friendID uint32, isTyping bool) {
+       c.handleFriendTyping(friendID, isTyping)
+   })
+   ```
+2. Add a `typing` file to each friend's directory showing typing state.
+3. Optionally send typing notifications when a user opens a friend's `text_in` FIFO.
+
+#### Step 4.3: Conference/Group Chat Support
+
+**Goal:** Add basic group chat via FIFO interface.
+
+1. Add a `conference_in` global FIFO to create/join conferences.
+2. For each active conference, create a directory:
+   ```
+   conferences/<conference_id>/
+   ├── text_in       # Send messages
+   ├── text_out      # Receive messages
+   ├── invite_in     # Invite friends (write friend public key)
+   └── members       # List of members (read-only)
+   ```
+3. Wire up `ConferenceNew`, `ConferenceInvite`, `ConferenceSendMessage`.
+
+#### Step 4.4: Async (Offline) Messaging
+
+**Goal:** Ensure offline messages are delivered and surfaced.
+
+1. Register `OnAsyncMessage` callback:
+   ```go
+   c.tox.OnAsyncMessage(func(senderPK [32]byte, message string, messageType async.MessageType) {
+       // Find friend by public key and write to their text_out
+   })
+   ```
+2. Messages sent to offline friends are already queued by toxcore's async manager — no FIFO changes needed for outgoing.
+3. Incoming async messages should appear in the same `text_out` FIFO as real-time messages, with a marker indicating they were delivered asynchronously.
+
+### Phase 5: Robustness & Quality
+
+#### Step 5.1: Add Client Package Tests
+
+**Goal:** Add unit tests for client logic.
+
+1. Create `client/client_test.go` with tests for:
+   - `SendMessage` validation (empty, too long, UTF-8 byte counting)
+   - Friend map operations (add, get, accept)
+   - Name/status message updates
+2. Create `client/fifo_test.go` with tests for:
+   - FIFO path generation
+   - Input parsing (Tox ID formats, message types)
+   - Handler dispatching
+
+#### Step 5.2: Improve Error Handling in File Transfers
+
+**Goal:** Handle edge cases in file transfers.
+
+1. Handle disk-full errors when writing received file chunks.
+2. Handle file-not-found errors when reading chunks for sending.
+3. Implement transfer timeout/cancellation for stalled transfers.
+4. Clean up partial files on transfer failure.
+
+#### Step 5.3: Add Integration Test
+
+**Goal:** Test the full client lifecycle using toxcore's test infrastructure.
+
+1. Use `toxcore.NewOptionsForTesting()` to create lightweight Tox instances.
+2. Create two clients, add each other as friends, exchange messages, verify FIFO output.
+3. Test file transfer end-to-end between two local clients.
+
+### Phase 6: Documentation & Polish
+
+#### Step 6.1: Update README.md
+
+1. Document new features: friend deletion, typing indicators, conference support.
+2. Update filesystem interface diagram with new FIFOs.
+3. Update version to reflect new toxcore dependency.
+
+#### Step 6.2: Update AUDIT.md
+
+1. Document the toxcore dependency update.
+2. Add entries for any new issues discovered during implementation.
+
+#### Step 6.3: Add Examples
+
+1. Add example scripts for conference chat.
+2. Add example scripts for file transfer monitoring.
+3. Add example for friend deletion.
+
+---
+
+## Priority Order
+
+| Priority | Steps | Effort | Impact |
+|----------|-------|--------|--------|
+| P0 | 1.1, 1.2, 1.3 | Medium | Completes file transfer — a documented core feature |
+| P1 | 2.1, 2.2, 2.3 | Low | Fixes friend online/offline tracking |
+| P2 | 3.1, 3.2, 3.3 | Low | Adopts better APIs for correctness and performance |
+| P3 | 4.1, 4.2 | Medium | Friend management and UX improvements |
+| P4 | 5.1, 5.2, 5.3 | Medium | Quality and test coverage |
+| P5 | 4.3, 4.4 | High | New features (group chat, offline messaging) |
+| P6 | 6.1, 6.2, 6.3 | Low | Documentation updates |
+
+## Verification
+
+After each phase, verify:
+
+```bash
+# Build
+go build ./...
+
+# Unit tests
+go test ./...
+
+# Race detection
+go test -race ./...
+
+# Vet
+go vet ./...
+
+# Integration test (when implemented)
+./test_ratox.sh
+```

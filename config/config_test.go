@@ -105,7 +105,7 @@ func TestGlobalFIFOPath(t *testing.T) {
 	}
 
 	fifoName := "request_in"
-	expected := "/test/config/request_in"
+	expected := "/test/config/client/request_in"
 	result := cfg.GlobalFIFOPath(fifoName)
 
 	if result != expected {

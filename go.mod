@@ -22,7 +22,3 @@ require (
 	golang.org/x/net v0.50.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 )
-
-// Replace with actual version when available
-// For now, assuming the toxcore library is in a sibling directory
-//replace github.com/opd-ai/toxcore => github.com/opd-ai/toxcore v0.0.0-20240101000000-000000000000

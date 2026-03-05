@@ -156,7 +156,7 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 	// Auto-accept files if configured
 	if c.config.AutoAcceptFiles {
 		// Use FileControl to accept the transfer
-		if err := c.tox.FileControl(friendID, fileNumber, 0); err != nil { // 0 = FileControlResume
+		if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlResume); err != nil {
 			log.Printf("Failed to accept file transfer: %v", err)
 		} else {
 			log.Printf("Auto-accepted file transfer: %s", filename)
