@@ -302,16 +302,23 @@ Implementation:
 
 These steps add new capabilities exposed by the updated toxcore.
 
-#### Step 4.1: Friend Deletion Support
+#### Step 4.1: Friend Deletion Support ✅
+
+**Status:** COMPLETE
 
 **Goal:** Allow users to remove friends through the filesystem interface.
 
-1. Add a `remove_in` FIFO to each friend's directory.
-2. Monitor `remove_in` — when a friend's public key or "confirm" is written:
-   - Call `c.tox.DeleteFriend(friendID)`.
-   - Remove the friend from `c.friends`.
-   - Clean up the friend's FIFO directory.
-   - Save Tox state.
+Implementation:
+- ✅ Added `RemoveIn` constant to FIFO names
+- ✅ Added `remove_in` FIFO to each friend's directory
+- ✅ Monitor `remove_in` in `monitorFriendFIFOs` with dedicated goroutine
+- ✅ Implemented `handleFriendRemoveIn` to validate confirmation ("confirm" or friend ID)
+- ✅ Extract friend number using `FriendByPublicKey` toxcore API
+- ✅ Call `tox.DeleteFriend(friendID)` to remove from Tox
+- ✅ Remove friend from `c.friends` map
+- ✅ Clean up friend's FIFO directory with `os.RemoveAll`
+- ✅ Save Tox state after deletion
+- ✅ Refactored into helper functions to maintain low complexity (main handler: 7, under threshold of 10)
 
 #### Step 4.2: Typing Notifications
 

@@ -61,6 +61,7 @@ const (
 	FileOut             = "file_out"       // Read-only - receive files
 	Status              = "status"         // Read-only - friend status
 	FriendStatusMessage = "status_message" // Read-only - friend status message
+	RemoveIn            = "remove_in"      // Write-only - remove friend
 
 	// FIFO permissions
 	FIFOPermInput  = 0o600 // Read/write for owner
@@ -165,6 +166,7 @@ func (fm *FIFOManager) CreateFriendFIFOs(friendID string) error {
 		{FileOut, false, true},
 		{Status, false, true},
 		{FriendStatusMessage, false, true},
+		{RemoveIn, true, false},
 	}
 
 	for _, fifo := range friendFIFOs {
@@ -400,6 +402,14 @@ func (fm *FIFOManager) monitorFriendFIFOs(ctx context.Context, friendID string) 
 		defer wg.Done()
 		fileInPath := fm.config.FriendFIFOPath(friendID, FileIn)
 		fm.monitorSingleFIFO(ctx, fileInPath, func(data string) { fm.handleFriendFileIn(friendID, data) })
+	}()
+
+	// Monitor remove_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		removeInPath := fm.config.FriendFIFOPath(friendID, RemoveIn)
+		fm.monitorSingleFIFO(ctx, removeInPath, func(data string) { fm.handleFriendRemoveIn(friendID, data) })
 	}()
 
 	// Wait for all monitoring goroutines to finish
@@ -660,6 +670,81 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	fm.client.transfersMu.Unlock()
 
 	log.Printf("File transfer initiated: %s (%d bytes) to friend %d, transfer ID: %d", filename, fileSize, friendNum, transferID)
+}
+
+// handleFriendRemoveIn processes friend removal requests
+func (fm *FIFOManager) handleFriendRemoveIn(friendID, data string) {
+	data = strings.TrimSpace(data)
+	if data == "" {
+		return
+	}
+
+	if fm.client.config.Debug {
+		log.Printf("Friend removal requested for %s with confirmation: %s", friendID, data)
+	}
+
+	if !fm.validateRemovalConfirmation(friendID, data) {
+		return
+	}
+
+	friendNum, err := fm.getFriendNumber(friendID)
+	if err != nil {
+		return
+	}
+
+	fm.removeFriend(friendID, friendNum)
+}
+
+func (fm *FIFOManager) validateRemovalConfirmation(friendID, data string) bool {
+	if data != "confirm" && data != friendID {
+		log.Printf("Invalid removal confirmation. Expected 'confirm' or friend ID, got: %s", data)
+		return false
+	}
+	return true
+}
+
+func (fm *FIFOManager) getFriendNumber(friendID string) (uint32, error) {
+	publicKeyBytes, err := hex.DecodeString(friendID)
+	if err != nil {
+		log.Printf("Invalid friend ID: %v", err)
+		return 0, err
+	}
+
+	if len(publicKeyBytes) != 32 {
+		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+		return 0, fmt.Errorf("invalid length")
+	}
+
+	var publicKey [32]byte
+	copy(publicKey[:], publicKeyBytes)
+
+	friendNum, err := fm.client.tox.FriendByPublicKey(publicKey)
+	if err != nil {
+		log.Printf("Friend not found: %s (%v)", friendID, err)
+		return 0, err
+	}
+
+	return friendNum, nil
+}
+
+func (fm *FIFOManager) removeFriend(friendID string, friendNum uint32) {
+	if err := fm.client.tox.DeleteFriend(friendNum); err != nil {
+		log.Printf("Failed to delete friend %d: %v", friendNum, err)
+		return
+	}
+
+	fm.client.friendsMu.Lock()
+	delete(fm.client.friends, friendNum)
+	fm.client.friendsMu.Unlock()
+
+	friendDir := fm.config.FriendDir(friendID)
+	if err := os.RemoveAll(friendDir); err != nil {
+		log.Printf("Failed to remove friend directory %s: %v", friendDir, err)
+	}
+
+	fm.client.saveToxData()
+
+	log.Printf("Friend %s removed successfully", friendID)
 }
 
 // Write functions for output FIFOs
