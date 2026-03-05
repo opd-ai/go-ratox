@@ -218,17 +218,17 @@ Implementation:
 - ✅ Writes connection status to friend's `status` FIFO with proper status strings (offline/online (TCP)/online (UDP))
 - ✅ Logs connection status changes in debug mode
 
-#### Step 2.2: Register `OnConnectionStatus` Callback
+#### Step 2.2: Register `OnConnectionStatus` Callback ✅
+
+**Status:** COMPLETE
 
 **Goal:** React to self connection status changes instead of polling.
 
-1. In `setupCallbacks`, add:
-   ```go
-   c.tox.OnConnectionStatus(func(status toxcore.ConnectionStatus) {
-       c.handleSelfConnectionStatusChange(status)
-   })
-   ```
-2. Implement `handleSelfConnectionStatusChange` to update the connection status file immediately.
+Implementation:
+- ✅ In `setupCallbacks`, added `OnConnectionStatus` callback registration
+- ✅ Implemented `handleSelfConnectionStatusChange` to update the connection status file immediately
+- ✅ Handler logs status changes in debug mode
+- ✅ Connection status file is now updated event-driven instead of polling-only
 
 #### Step 2.3: Register `OnFriendStatusMessage` Callback
 

@@ -159,6 +159,31 @@ func (c *Client) handleFriendConnectionStatusChange(friendID uint32, status toxc
 	}
 }
 
+// handleSelfConnectionStatusChange processes self connection status changes
+func (c *Client) handleSelfConnectionStatusChange(status toxcore.ConnectionStatus) {
+	// Update connection status file immediately
+	if err := c.fifoManager.createConnectionStatusFile(); err != nil {
+		if c.config.Debug {
+			log.Printf("Failed to update connection status file: %v", err)
+		}
+	}
+
+	if c.config.Debug {
+		var statusStr string
+		switch status {
+		case toxcore.ConnectionNone:
+			statusStr = "offline"
+		case toxcore.ConnectionTCP:
+			statusStr = "tcp"
+		case toxcore.ConnectionUDP:
+			statusStr = "udp"
+		default:
+			statusStr = "unknown"
+		}
+		log.Printf("Self connection status changed to: %s", statusStr)
+	}
+}
+
 // handleFileReceive processes incoming file transfer requests
 func (c *Client) handleFileReceive(friendID, fileNumber uint32, kind int, fileSize uint64, filename string) {
 	c.friendsMu.RLock()
