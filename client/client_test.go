@@ -90,8 +90,8 @@ func TestSendMessageUTF8Counting(t *testing.T) {
 		expectByte int
 	}{
 		{"ASCII only", "Hello", 5},
-		{"UTF-8 2-byte chars", "café", 5}, // c, a, f, é(2 bytes)
-		{"UTF-8 3-byte chars", "世界", 6},   // Each Chinese char is 3 bytes
+		{"UTF-8 2-byte chars", "café", 5},   // c, a, f, é(2 bytes)
+		{"UTF-8 3-byte chars", "世界", 6},     // Each Chinese char is 3 bytes
 		{"UTF-8 4-byte chars", "𝓗𝓮𝓵𝓵𝓸", 20}, // Each mathematical script char is 4 bytes
 		{"Mixed ASCII and UTF-8", "Hello 世界", 12},
 	}
@@ -235,10 +235,10 @@ func TestMessageTypeHandling(t *testing.T) {
 // TestFriendStructStatusValues tests Friend struct status field values
 func TestFriendStructStatusValues(t *testing.T) {
 	tests := []struct {
-		name         string
-		status       int
-		expectedStr  string
-		validStatus  bool
+		name        string
+		status      int
+		expectedStr string
+		validStatus bool
 	}{
 		{"None status", 0, "none", true},
 		{"Away status", 1, "away", true},
@@ -320,9 +320,9 @@ func TestClientInitialization(t *testing.T) {
 // TestTransferKeyGeneration tests file transfer key generation pattern
 func TestTransferKeyGeneration(t *testing.T) {
 	tests := []struct {
-		name       string
-		friendID   uint32
-		fileID     uint32
+		name        string
+		friendID    uint32
+		fileID      uint32
 		expectedKey string
 	}{
 		{"Simple IDs", 1, 2, "1:2"},
