@@ -82,3 +82,6 @@ go.work.sum
 /go-ratox
 /ratox-go
 /ratox*
+# Analysis reports
+readiness-report.json
+post-remediation.json
