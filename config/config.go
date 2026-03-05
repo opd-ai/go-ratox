@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -17,6 +15,14 @@ const (
 	ConfigFileName = "config.json"
 	// SaveDataFileName is the name of the Tox save data file
 	SaveDataFileName = "ratox.tox"
+
+	// DefaultBootstrapPort is the standard Tox DHT bootstrap port.
+	DefaultBootstrapPort = 33445
+	// DefaultMaxFileSizeBytes is the default maximum allowed file transfer size (100 MiB).
+	DefaultMaxFileSizeBytes int64 = 104857600
+
+	// configFilePerm is the file permission for the configuration file.
+	configFilePerm = 0o600
 )
 
 // Config holds all configuration options for ratox-go
@@ -57,22 +63,22 @@ type BootstrapNode struct {
 var DefaultBootstrapNodes = []BootstrapNode{
 	{
 		Address:   "nodes.tox.chat",
-		Port:      33445,
+		Port:      DefaultBootstrapPort,
 		PublicKey: "6FC41E2BD381D37E9748FC0E0328CE086AF9598BECC8FEB7DDF2E440475F300E",
 	},
 	{
 		Address:   "130.133.110.14",
-		Port:      33445,
+		Port:      DefaultBootstrapPort,
 		PublicKey: "461FA3776EF0FA655F1A05477DF1B3B614F7D6B124F7DB1DD4FE3C08B03B640F",
 	},
 	{
 		Address:   "tox.zodiaclabs.org",
-		Port:      33445,
+		Port:      DefaultBootstrapPort,
 		PublicKey: "A09162D68618E742FFBCA1C2C70385E6679604B2D80EA6E84AD0996A1AC8A074",
 	},
 	{
 		Address:   "tox2.abilinski.com",
-		Port:      33445,
+		Port:      DefaultBootstrapPort,
 		PublicKey: "7A6098B590BDC73F9723FC59F82B3F9085A64D1B213AAF8E610FD351930D052D",
 	},
 }
@@ -80,9 +86,7 @@ var DefaultBootstrapNodes = []BootstrapNode{
 // Load loads configuration from the specified directory
 // If the configuration file doesn't exist, it creates a default one
 func Load(configDir string) (*Config, error) {
-	pc, _, _, _ := runtime.Caller(0)
-	funcName := runtime.FuncForPC(pc).Name()
-	caller := funcName[strings.LastIndex(funcName, ".")+1:]
+	const caller = "Load"
 
 	logrus.WithFields(logrus.Fields{
 		"caller":     caller,
@@ -106,7 +110,7 @@ func Load(configDir string) (*Config, error) {
 		Name:            "ratox-go user",
 		StatusMessage:   "Running ratox-go",
 		AutoAcceptFiles: false,
-		MaxFileSize:     100 * 1024 * 1024, // 100MB default
+		MaxFileSize:     DefaultMaxFileSizeBytes, // 100 MiB default
 		BootstrapNodes:  DefaultBootstrapNodes,
 		SaveFile:        saveFile,
 	}
@@ -132,12 +136,12 @@ func Load(configDir string) (*Config, error) {
 			"file_size": len(data),
 		}).Debug("Configuration file read successfully, parsing JSON")
 
-		if err := json.Unmarshal(data, cfg); err != nil {
+		if parseErr := json.Unmarshal(data, cfg); parseErr != nil {
 			logrus.WithFields(logrus.Fields{
 				"caller": caller,
-				"error":  err,
+				"error":  parseErr,
 			}).Error("Failed to parse configuration file")
-			return nil, fmt.Errorf("failed to parse config file: %w", err)
+			return nil, fmt.Errorf("failed to parse config file: %w", parseErr)
 		}
 
 		logrus.WithFields(logrus.Fields{
@@ -185,9 +189,7 @@ func Load(configDir string) (*Config, error) {
 
 // Save saves the configuration to disk
 func (c *Config) Save() error {
-	pc, _, _, _ := runtime.Caller(0)
-	funcName := runtime.FuncForPC(pc).Name()
-	caller := funcName[strings.LastIndex(funcName, ".")+1:]
+	const caller = "Save"
 
 	configFile := filepath.Join(c.ConfigDir, ConfigFileName)
 
@@ -211,7 +213,7 @@ func (c *Config) Save() error {
 		"json_size": len(data),
 	}).Debug("Configuration marshaled to JSON successfully")
 
-	if err := os.WriteFile(configFile, data, 0600); err != nil {
+	if err := os.WriteFile(configFile, data, configFilePerm); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"caller":      caller,
 			"config_file": configFile,

@@ -103,13 +103,13 @@ func (c *Client) handleFriendStatusChange(friendID uint32, status int) {
 	if exists {
 		// Write status to friend's status FIFO
 		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
-		statusStr := "offline"
+		statusStr := statusOffline
 		switch status {
-		case 0:
+		case friendStatusOnline:
 			statusStr = "online"
-		case 1:
+		case friendStatusAway:
 			statusStr = "away"
-		case 2:
+		case friendStatusBusy:
 			statusStr = "busy"
 		}
 
@@ -124,7 +124,7 @@ func (c *Client) handleFriendStatusChange(friendID uint32, status int) {
 }
 
 // handleFileReceive processes incoming file transfer requests
-func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int, fileSize uint64, filename string) {
+func (c *Client) handleFileReceive(friendID, fileNumber uint32, _ int, fileSize uint64, filename string) {
 	c.friendsMu.RLock()
 	friend, exists := c.friends[friendID]
 	c.friendsMu.RUnlock()
@@ -139,7 +139,7 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 	}
 
 	// Check file size limits
-	if c.config.MaxFileSize > 0 && int64(fileSize) > c.config.MaxFileSize {
+	if c.config.MaxFileSize > 0 && fileSize > uint64(c.config.MaxFileSize) { //nolint:gosec // MaxFileSize is validated to be positive
 		log.Printf("File too large (%d bytes), rejecting", fileSize)
 		// TODO: Implement file control rejection
 		return
@@ -165,7 +165,7 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 }
 
 // handleFileReceiveChunk processes incoming file data chunks
-func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, position uint64, data []byte) {
+func (c *Client) handleFileReceiveChunk(friendID, fileNumber uint32, position uint64, data []byte) {
 	if c.config.Debug {
 		c.friendsMu.RLock()
 		friend, exists := c.friends[friendID]
@@ -186,7 +186,7 @@ func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, posi
 }
 
 // handleFileChunkRequest processes outgoing file chunk requests
-func (c *Client) handleFileChunkRequest(friendID uint32, fileNumber uint32, position uint64, length int) {
+func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position uint64, length int) {
 	if c.config.Debug {
 		c.friendsMu.RLock()
 		friend, exists := c.friends[friendID]

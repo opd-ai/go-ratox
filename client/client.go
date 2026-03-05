@@ -10,8 +10,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/opd-ai/go-ratox/config"
 	"github.com/opd-ai/toxcore"
+
+	"github.com/opd-ai/go-ratox/config"
+)
+
+const (
+	// maxToxMessageBytes is the maximum allowed Tox message size in bytes.
+	maxToxMessageBytes = 1372
+	// toxIterateInterval is the interval for the Tox main iteration loop.
+	toxIterateInterval = 50 * time.Millisecond
+	// autoSaveInterval is how often Tox state is persisted to disk.
+	autoSaveInterval = 5 * time.Minute
+	// connectionStatusInterval is how often the connection status file is refreshed.
+	connectionStatusInterval = 10 * time.Second
+	// saveFilePerm is the file permission for the Tox save file.
+	saveFilePerm = 0o600
 )
 
 // Client represents the main Tox client with FIFO interface
@@ -66,11 +80,7 @@ func New(cfg *config.Config) (*Client, error) {
 	client.fifoManager = fifoManager
 
 	// Load existing friends
-	if err := client.loadFriends(); err != nil {
-		client.tox.Kill()
-		cancel()
-		return nil, fmt.Errorf("failed to load friends: %w", err)
-	}
+	client.loadFriends()
 
 	// Set up Tox callbacks
 	client.setupCallbacks()
@@ -91,7 +101,7 @@ func (c *Client) initTox() error {
 	if saveData, err := os.ReadFile(c.config.SaveFile); err == nil {
 		options.SavedataType = toxcore.SaveDataTypeToxSave
 		options.SavedataData = saveData
-		options.SavedataLength = uint32(len(saveData))
+		options.SavedataLength = uint32(len(saveData)) //nolint:gosec // len is always non-negative and Tox save data is small
 
 		if c.config.Debug {
 			log.Printf("Loading existing save data from %s", c.config.SaveFile)
@@ -160,7 +170,7 @@ func (c *Client) setupCallbacks() {
 }
 
 // loadFriends loads existing friends from Tox save data
-func (c *Client) loadFriends() error {
+func (c *Client) loadFriends() {
 	toxFriends := c.tox.GetFriends()
 
 	for friendID, toxFriend := range toxFriends {
@@ -187,8 +197,6 @@ func (c *Client) loadFriends() error {
 			log.Printf("Loaded friend: %s (%s)", friend.Name, friendIDStr)
 		}
 	}
-
-	return nil
 } // Run starts the Tox client main loop
 func (c *Client) Run() error {
 	c.mu.Lock()
@@ -234,7 +242,7 @@ func (c *Client) Run() error {
 	}()
 
 	// Main Tox iteration loop
-	ticker := time.NewTicker(50 * time.Millisecond)
+	ticker := time.NewTicker(toxIterateInterval)
 	defer ticker.Stop()
 
 	for {
@@ -264,7 +272,7 @@ func (c *Client) bootstrap() {
 
 // autoSave periodically saves Tox state to disk
 func (c *Client) autoSave() {
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(autoSaveInterval)
 	defer ticker.Stop()
 
 	for {
@@ -281,7 +289,7 @@ func (c *Client) autoSave() {
 
 // updateConnectionStatus periodically updates the connection status file
 func (c *Client) updateConnectionStatus() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(connectionStatusInterval)
 	defer ticker.Stop()
 
 	for {
@@ -301,7 +309,7 @@ func (c *Client) updateConnectionStatus() {
 // saveToxData saves Tox state to disk
 func (c *Client) saveToxData() {
 	saveData := c.tox.GetSavedata()
-	if err := os.WriteFile(c.config.SaveFile, saveData, 0600); err != nil {
+	if err := os.WriteFile(c.config.SaveFile, saveData, saveFilePerm); err != nil {
 		log.Printf("Error saving Tox data: %v", err)
 	} else if c.config.Debug {
 		log.Printf("Tox data saved to %s", c.config.SaveFile)
@@ -358,14 +366,14 @@ func (c *Client) GetFriend(friendID uint32) (*Friend, bool) {
 
 // SendMessage sends a text message to a friend
 func (c *Client) SendMessage(friendID uint32, message string, messageType toxcore.MessageType) error {
-	if len(message) == 0 {
+	if message == "" {
 		return fmt.Errorf("message cannot be empty")
 	}
 
 	// Check byte length, not character count, for UTF-8 messages
 	messageBytes := []byte(message)
-	if len(messageBytes) > 1372 {
-		return fmt.Errorf("message too long (max 1372 bytes, got %d)", len(messageBytes))
+	if len(messageBytes) > maxToxMessageBytes {
+		return fmt.Errorf("message too long (max %d bytes, got %d)", maxToxMessageBytes, len(messageBytes))
 	}
 
 	return c.tox.SendFriendMessage(friendID, message, messageType)

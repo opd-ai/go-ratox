@@ -1,25 +1,14 @@
 linters-settings:
   govet:
-    check-shadowing: true
-  golint:
-    min-confidence: 0
+    enable:
+      - shadow
   gocyclo:
     min-complexity: 15
-  maligned:
-    suggest-new: true
   dupl:
     threshold: 100
   goconst:
     min-len: 2
     min-occurrences: 2
-  depguard:
-    list-type: blacklist
-    packages:
-      # logging is allowed only by logutils.Log, logrus
-      # is allowed to use only in logutils package
-      - github.com/sirupsen/logrus
-    packages-with-error-message:
-      - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   misspell:
     locale: US
   lll:
@@ -42,6 +31,14 @@ linters-settings:
   funlen:
     lines: 100
     statements: 50
+  mnd:
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -49,12 +46,10 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
-    - depguard
+    - copyloopvar
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - funlen
     - gochecknoinits
     - goconst
@@ -62,43 +57,47 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - golint
-    - gomnd
+    - revive
+    - mnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - lll
     - misspell
     - nakedret
     - noctx
     - nolintlint
     - rowserrcheck
-    - scopelint
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
 
   # don't enable:
   # - asciicheck
+  # - deadcode        (replaced by unused)
+  # - depguard        (config not applicable to this project)
+  # - exportloopref   (replaced by copyloopvar; redundant since Go 1.22)
   # - gochecknoglobals
   # - gocognit
   # - godot
   # - godox
   # - goerr113
+  # - golint          (replaced by revive)
+  # - gomnd           (replaced by mnd)
+  # - interfacer      (archived)
   # - maligned
   # - nestif
   # - prealloc
+  # - scopelint       (replaced by copyloopvar)
+  # - structcheck     (replaced by unused)
   # - testpackage
-  # - revive
+  # - varcheck        (replaced by unused)
   # - wsl
 
 issues:
@@ -106,7 +105,7 @@ issues:
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
+        - mnd
         - funlen
         - gocyclo
 
@@ -115,17 +114,11 @@ issues:
         - gocritic
       text: "unnecessaryDefer:"
 
-run:
-  timeout: 5m
-  skip-dirs:
-    - build
-    - vendor
-  skip-files:
+  exclude-files:
     - ".*\\.pb\\.go$"
 
-# golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configuration
-service:
-  golangci-lint-version: 1.50.x # use the fixed version to not introduce new linters unexpectedly
-  prepare:
-    - echo "here I can run custom commands, but no preparation needed"
+run:
+  timeout: 5m
+  exclude-dirs:
+    - build
+    - vendor

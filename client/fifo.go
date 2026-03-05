@@ -16,8 +16,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/opd-ai/go-ratox/config"
 	"github.com/opd-ai/toxcore"
+
+	"github.com/opd-ai/go-ratox/config"
 )
 
 // FIFOManager handles all FIFO operations for the client
@@ -41,7 +42,6 @@ type FIFO struct {
 	Reader   *bufio.Reader
 	Writer   *bufio.Writer
 	LastUsed time.Time
-	mu       sync.Mutex
 }
 
 // FIFO names and permissions
@@ -62,9 +62,35 @@ const (
 	Status  = "status"   // Read-only - friend status
 
 	// FIFO permissions
-	FIFOPermInput  = 0600 // Read/write for owner
-	FIFOPermOutput = 0600 // Read/write for owner
-	DirPerm        = 0700 // rwx------
+	FIFOPermInput  = 0o600 // Read/write for owner
+	FIFOPermOutput = 0o600 // Read/write for owner
+	DirPerm        = 0o700 // rwx------
+
+	// filePermission is the permission for regular data files.
+	filePermission = 0o600
+
+	// Friend status string values
+	statusOffline = "offline"
+
+	// fifoCleanupInterval is how often unused FIFOs are cleaned up.
+	fifoCleanupInterval = 5 * time.Minute
+	// fifoCleanupAge is the inactivity age after which a FIFO is removed.
+	fifoCleanupAge = 30 * time.Minute
+
+	// Tox ID / public key sizes.
+	toxIDHexLen     = 76 // full Tox ID in hex chars (public key + nospam + checksum)
+	publicKeyHexLen = 64 // public key portion of Tox ID in hex chars
+	publicKeyLen    = 32 // public key in bytes
+
+	// Tox connection status values.
+	connectionNone = 0 // not connected
+	connectionTCP  = 1 // connected via TCP relay
+	connectionUDP  = 2 // connected via UDP
+
+	// Friend user-status values.
+	friendStatusOnline = 0 // online (none)
+	friendStatusAway   = 1 // away
+	friendStatusBusy   = 2 // busy
 )
 
 // NewFIFOManager creates a new FIFO manager
@@ -202,7 +228,7 @@ func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
 	}
 
 	// Create the FIFO
-	var perm os.FileMode = 0600 // Default permission
+	var perm os.FileMode = 0o600 // Default permission
 	if isInput {
 		perm = FIFOPermInput
 	} else if isOutput {
@@ -241,7 +267,7 @@ func (fm *FIFOManager) createIDFile() error {
 	idPath := fm.config.GlobalFIFOPath(ID)
 	toxID := fm.client.GetToxID()
 
-	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0644); err != nil {
+	if err := os.WriteFile(idPath, []byte(toxID+"\n"), filePermission); err != nil {
 		return fmt.Errorf("failed to write ID file: %w", err)
 	}
 
@@ -272,11 +298,11 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 
 	var statusStr string
 	switch connectionStatus {
-	case 0: // ConnectionNone
-		statusStr = "offline"
-	case 1: // ConnectionTCP
+	case connectionNone:
+		statusStr = statusOffline
+	case connectionTCP:
 		statusStr = "tcp"
-	case 2: // ConnectionUDP
+	case connectionUDP:
 		statusStr = "udp"
 	default:
 		statusStr = "unknown"
@@ -284,7 +310,7 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 
 	statusInfo := fmt.Sprintf("connection: %s\nfriends: %d total, %d online\n", statusStr, friendsCount, onlineFriends)
 
-	if err := os.WriteFile(statusPath, []byte(statusInfo), 0644); err != nil {
+	if err := os.WriteFile(statusPath, []byte(statusInfo), filePermission); err != nil {
 		return fmt.Errorf("failed to write connection status file: %w", err)
 	}
 
@@ -404,47 +430,6 @@ func (fm *FIFOManager) monitorFriendFIFOs(ctx context.Context, friendID string) 
 	wg.Wait()
 }
 
-// readFIFO reads data from a FIFO and calls the handler function
-func (fm *FIFOManager) readFIFO(ctx context.Context, path string, handler func(string)) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
-	// Open FIFO for reading (non-blocking)
-	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NONBLOCK, 0)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Read data
-	reader := bufio.NewReader(file)
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
-
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-
-		line = strings.TrimSpace(line)
-		if line != "" {
-			handler(line)
-		}
-	}
-
-	return nil
-}
-
 // writeFIFO writes data to a FIFO
 func (fm *FIFOManager) writeFIFO(path, data string) error {
 	fm.fifosMu.RLock()
@@ -482,26 +467,26 @@ func (fm *FIFOManager) handleRequestIn(toxID string) {
 	toxID = strings.TrimSpace(toxID)
 
 	// Accept both 64-character public key and 76-character full Tox ID
-	var publicKeyHex string
-	if len(toxID) == 64 {
+	var pubKeyHex string
+	if len(toxID) == publicKeyHexLen {
 		// 64-character public key format
-		publicKeyHex = toxID
-	} else if len(toxID) == 76 {
+		pubKeyHex = toxID
+	} else if len(toxID) == toxIDHexLen {
 		// 76-character full Tox ID format (public key + nospam + checksum)
-		publicKeyHex = toxID[:64]
+		pubKeyHex = toxID[:publicKeyHexLen]
 	} else {
-		log.Printf("Invalid Tox ID format: expected 64 or 76 characters, got %d", len(toxID))
+		log.Printf("Invalid Tox ID format: expected %d or %d characters, got %d", publicKeyHexLen, toxIDHexLen, len(toxID))
 		return
 	}
 
 	// Decode public key from hex
-	publicKeyBytes, err := hex.DecodeString(publicKeyHex)
+	publicKeyBytes, err := hex.DecodeString(pubKeyHex)
 	if err != nil {
 		log.Printf("Invalid public key in Tox ID: %v", err)
 		return
 	}
 
-	var publicKey [32]byte
+	var publicKey [publicKeyLen]byte
 	copy(publicKey[:], publicKeyBytes)
 
 	// Accept friend request
@@ -513,7 +498,7 @@ func (fm *FIFOManager) handleRequestIn(toxID string) {
 // handleNameChange processes display name changes
 func (fm *FIFOManager) handleNameChange(name string) {
 	name = strings.TrimSpace(name)
-	if len(name) == 0 {
+	if name == "" {
 		log.Printf("Empty name provided")
 		return
 	}
@@ -535,7 +520,7 @@ func (fm *FIFOManager) handleStatusMessageChange(message string) {
 // handleFriendTextIn processes outgoing text messages
 func (fm *FIFOManager) handleFriendTextIn(friendID, message string) {
 	message = strings.TrimSpace(message)
-	if len(message) == 0 {
+	if message == "" {
 		return
 	}
 
@@ -547,12 +532,12 @@ func (fm *FIFOManager) handleFriendTextIn(friendID, message string) {
 	}
 
 	// Validate public key length to prevent buffer overflow
-	if len(publicKeyBytes) != 32 {
-		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+	if len(publicKeyBytes) != publicKeyLen {
+		log.Printf("Invalid friend ID length: expected %d bytes, got %d", publicKeyLen, len(publicKeyBytes))
 		return
 	}
 
-	var publicKey [32]byte
+	var publicKey [publicKeyLen]byte
 	copy(publicKey[:], publicKeyBytes)
 
 	// Find friend number by public key
@@ -589,7 +574,7 @@ func (fm *FIFOManager) handleFriendTextIn(friendID, message string) {
 // handleFriendFileIn processes outgoing file transfers
 func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	filePath = strings.TrimSpace(filePath)
-	if len(filePath) == 0 {
+	if filePath == "" {
 		return
 	}
 
@@ -602,12 +587,12 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 		return
 	}
 
-	if len(publicKeyBytes) != 32 {
-		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+	if len(publicKeyBytes) != publicKeyLen {
+		log.Printf("Invalid friend ID length: expected %d bytes, got %d", publicKeyLen, len(publicKeyBytes))
 		return
 	}
 
-	var publicKey [32]byte
+	var publicKey [publicKeyLen]byte
 	copy(publicKey[:], publicKeyBytes)
 
 	// Find friend
@@ -640,11 +625,17 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 		return
 	}
 
-	fileSize := uint64(fileInfo.Size())
+	sz := fileInfo.Size()
+	if sz < 0 {
+		log.Printf("Invalid file size for %s", filePath)
+		return
+	}
+	fileSize := uint64(sz) // sz is checked to be non-negative above
 
 	// Check file size limits
-	if fm.client.config.MaxFileSize > 0 && int64(fileSize) > fm.client.config.MaxFileSize {
-		log.Printf("File too large (%d bytes), maximum allowed: %d", fileSize, fm.client.config.MaxFileSize)
+	maxSize := fm.client.config.MaxFileSize
+	if maxSize > 0 && fileSize > uint64(maxSize) {
+		log.Printf("File too large (%d bytes), maximum allowed: %d", fileSize, maxSize)
 		return
 	}
 
@@ -692,7 +683,7 @@ func (fm *FIFOManager) WriteFriendFileOut(friendID, fileInfo string) error {
 
 // periodicCleanup performs periodic maintenance tasks
 func (fm *FIFOManager) periodicCleanup(ctx context.Context) {
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(fifoCleanupInterval)
 	defer ticker.Stop()
 
 	for {
@@ -708,7 +699,7 @@ func (fm *FIFOManager) periodicCleanup(ctx context.Context) {
 
 // cleanupUnusedFIFOs removes FIFOs that haven't been used recently
 func (fm *FIFOManager) cleanupUnusedFIFOs() {
-	cutoff := time.Now().Add(-30 * time.Minute)
+	cutoff := time.Now().Add(-fifoCleanupAge)
 
 	fm.fifosMu.Lock()
 	defer fm.fifosMu.Unlock()

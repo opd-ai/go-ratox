@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const testFriendID = "1234567890ABCDEF"
+
 func TestLoad(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "ratox-test-*")
@@ -61,8 +63,8 @@ func TestSave(t *testing.T) {
 	}
 
 	// Save config
-	if err := cfg.Save(); err != nil {
-		t.Fatalf("Failed to save config: %v", err)
+	if saveErr := cfg.Save(); saveErr != nil {
+		t.Fatalf("Failed to save config: %v", saveErr)
 	}
 
 	// Load config again
@@ -90,9 +92,8 @@ func TestFriendDir(t *testing.T) {
 		ConfigDir: "/test/config",
 	}
 
-	friendID := "1234567890ABCDEF"
-	expected := "/test/config/1234567890ABCDEF"
-	result := cfg.FriendDir(friendID)
+	expected := "/test/config/" + testFriendID
+	result := cfg.FriendDir(testFriendID)
 
 	if result != expected {
 		t.Errorf("Expected %s, got %s", expected, result)
@@ -118,10 +119,9 @@ func TestFriendFIFOPath(t *testing.T) {
 		ConfigDir: "/test/config",
 	}
 
-	friendID := "1234567890ABCDEF"
 	fifoName := "text_in"
-	expected := "/test/config/1234567890ABCDEF/text_in"
-	result := cfg.FriendFIFOPath(friendID, fifoName)
+	expected := "/test/config/" + testFriendID + "/text_in"
+	result := cfg.FriendFIFOPath(testFriendID, fifoName)
 
 	if result != expected {
 		t.Errorf("Expected %s, got %s", expected, result)
