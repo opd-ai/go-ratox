@@ -129,16 +129,18 @@ The following gaps have been identified by auditing the go-ratox client against 
 
 ### Gap 13: Alternate Transport Support
 
-**Status:** Missing — only UDP transport is enabled; TCP relay and encrypted transports are not used.
+**Status:** Missing — only UDP transport is enabled; TCP relay, encrypted transports, and anonymizing overlay networks are not used.
 
 **Files:** `client/client.go`, `config/config.go`
 
 **Details:**
 - The toxcore API provides pluggable transports: UDP (`transport.NewUDPTransport()`), TCP relay support, Noise-IK encryption (`transport.NewNoiseTransport()`), and version-negotiating transport (`transport.NewNegotiatingTransport()` for automatic legacy/Noise-IK fallback).
-- go-ratox currently only sets `options.UDPEnabled = true` and does not expose any configuration for TCP relay connections or encrypted transport layers.
+- go-ratox currently only sets `options.UDPEnabled = true` and does not expose any configuration for TCP relay connections, encrypted transport layers, or anonymizing overlay networks.
 - Enabling TCP relay support would allow connectivity through restrictive NATs and firewalls where UDP is blocked.
 - Wrapping transports with Noise-IK provides forward secrecy beyond the standard Tox encryption.
 - `NegotiatingTransport` enables seamless interoperability between legacy and Noise-IK peers.
+- **Tor transport** is not supported. Routing Tox traffic through the Tor network (via a local SOCKS5 proxy) would hide the user's IP address from peers and bootstrap nodes, providing strong anonymity.
+- **I2P transport** is not supported. Routing Tox traffic through the I2P network (via the SAM bridge or I2P SOCKS proxy) would provide an alternative anonymizing overlay with garlic routing, offering strong anonymity and resistance to traffic analysis.
 
 ### Gap 14: Bootstrap Node Mode
 
@@ -362,7 +364,7 @@ These steps add new capabilities exposed by the updated toxcore.
 
 #### Step 4.5: Alternate Transport Support
 
-**Goal:** Enable TCP relay and encrypted transport layers for improved connectivity and security.
+**Goal:** Enable TCP relay, encrypted transport layers, and anonymizing overlay networks (Tor, I2P) for improved connectivity, security, and privacy.
 
 1. Add transport configuration fields to `Config`:
    ```go
@@ -371,6 +373,10 @@ These steps add new capabilities exposed by the updated toxcore.
        TCPPort          uint16 `json:"tcp_port"`
        NoiseEnabled     bool   `json:"noise_enabled"`
        NegotiateVersion bool   `json:"negotiate_version"`
+       TorEnabled       bool   `json:"tor_enabled"`
+       TorSOCKSAddr     string `json:"tor_socks_addr"`  // e.g. "127.0.0.1:9050"
+       I2PEnabled       bool   `json:"i2p_enabled"`
+       I2PSAMAddr       string `json:"i2p_sam_addr"`    // e.g. "127.0.0.1:7656"
    }
    ```
 2. In `initTox()`, configure the transport based on settings:
@@ -382,8 +388,24 @@ These steps add new capabilities exposed by the updated toxcore.
    ```
 3. When `NoiseEnabled` is true, wrap the transport with `transport.NewNoiseTransport()` for Noise-IK forward secrecy.
 4. When `NegotiateVersion` is true, use `transport.NewNegotiatingTransport()` to support automatic fallback between Noise-IK and legacy protocols.
-5. Add a global `transport` status file exposing the active transport type (UDP, TCP, Noise-IK).
-6. Update default configuration to include transport options (TCP disabled by default for backward compatibility).
+5. When `TorEnabled` is true, route all Tox TCP traffic through a local Tor SOCKS5 proxy:
+   - Use the configured `TorSOCKSAddr` (defaulting to `127.0.0.1:9050`) to establish a SOCKS5 connection.
+   - Disable UDP when Tor is active (Tor only supports TCP streams), falling back to TCP relay mode automatically.
+   - Wrap outgoing connections with `golang.org/x/net/proxy` or a SOCKS5 dialer to tunnel through Tor.
+   - Support `.onion` addresses for bootstrap nodes and friends running Tor hidden services.
+   - Ensure DNS resolution is performed through Tor to prevent DNS leaks.
+6. When `I2PEnabled` is true, route all Tox traffic through the I2P network:
+   - Connect to the local I2P router via the SAM (Simple Anonymous Messaging) bridge at `I2PSAMAddr` (defaulting to `127.0.0.1:7656`).
+   - Create an I2P session and use it for all Tox connections, providing garlic-routed anonymity.
+   - Disable UDP when I2P is active, using I2P streaming (TCP-like) connections instead.
+   - Generate and expose a `.b32.i2p` destination address for the node so other I2P-based Tox peers can connect.
+   - Support `.b32.i2p` and full base64 I2P destination addresses for bootstrap nodes and friends.
+7. Add a global `transport` status file exposing the active transport type (UDP, TCP, Noise-IK, Tor, I2P).
+8. Update default configuration to include transport options (all alternate transports disabled by default for backward compatibility).
+9. Validate transport configuration at startup:
+   - Tor and I2P are mutually exclusive (cannot be enabled simultaneously, as each requires exclusive control over the connection routing layer).
+   - Tor and I2P require TCP mode (UDP is automatically disabled when either is active).
+   - Warn and continue without the overlay network if the configured SOCKS5 or SAM address is unreachable, falling back to direct TCP/UDP connectivity.
 
 #### Step 4.6: Bootstrap Node Mode
 
@@ -472,7 +494,7 @@ These steps add new capabilities exposed by the updated toxcore.
 | P3 | 4.1, 4.2 | Medium | Friend management and UX improvements |
 | P4 | 5.1, 5.2, 5.3 | Medium | Quality and test coverage |
 | P5 | 4.3, 4.4 | High | New features (group chat, offline messaging) |
-| P6 | 4.5 | Medium | Alternate transports for improved connectivity and security |
+| P6 | 4.5 | Medium | Alternate transports (TCP, Noise-IK, Tor, I2P) for connectivity, security, and anonymity |
 | P7 | 4.6 | High | Bootstrap node mode for self-hosted Tox infrastructure |
 | P8 | 6.1, 6.2, 6.3 | Low | Documentation updates |
 
