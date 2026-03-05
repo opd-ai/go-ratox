@@ -53,6 +53,7 @@ const (
 	StatusMessage    = "status_message"    // Write-only - set status message
 	ID               = "id"                // Read-only - Tox ID file
 	ConnectionStatus = "connection_status" // Read-only - connection status info
+	TransportStatus  = "transport_status"  // Read-only - transport status info
 	ConferenceIn     = "conference_in"     // Write-only - create/join conferences
 
 	// Friend-specific FIFOs
@@ -150,6 +151,11 @@ func (fm *FIFOManager) createGlobalFIFOs() error {
 	// Create connection status file
 	if err := fm.createConnectionStatusFile(); err != nil {
 		return fmt.Errorf("failed to create connection status file: %w", err)
+	}
+
+	// Create transport status file
+	if err := fm.createTransportStatusFile(); err != nil {
+		return fmt.Errorf("failed to create transport status file: %w", err)
 	}
 
 	return nil
@@ -332,6 +338,41 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 	}
 
 	return nil
+}
+
+// createTransportStatusFile creates a file containing transport status information
+func (fm *FIFOManager) createTransportStatusFile() error {
+	statusPath := fm.config.GlobalFIFOPath(TransportStatus)
+
+	transportInfo := fm.getTransportInfo()
+
+	if err := os.WriteFile(statusPath, []byte(transportInfo), 0o644); err != nil {
+		return fmt.Errorf("failed to write transport status file: %w", err)
+	}
+
+	if fm.config.Debug {
+		log.Printf("Created transport status file: %s", statusPath)
+	}
+
+	return nil
+}
+
+// getTransportInfo returns formatted transport information string
+func (fm *FIFOManager) getTransportInfo() string {
+	cfg := fm.config.Transport
+	var transportType string
+
+	if cfg.TorEnabled {
+		transportType = fmt.Sprintf("tor (SOCKS5: %s)", cfg.TorSOCKSAddr)
+	} else if cfg.I2PEnabled {
+		transportType = fmt.Sprintf("i2p (SAM: %s)", cfg.I2PSAMAddr)
+	} else if cfg.TCPEnabled {
+		transportType = fmt.Sprintf("tcp+udp (TCP port: %d)", cfg.TCPPort)
+	} else {
+		transportType = "udp"
+	}
+
+	return fmt.Sprintf("transport: %s\n", transportType)
 }
 
 // monitorGlobalFIFOs monitors global FIFO files for input

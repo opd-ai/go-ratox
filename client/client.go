@@ -120,38 +120,72 @@ func New(cfg *config.Config) (*Client, error) {
 
 // initTox initializes the Tox instance
 func (c *Client) initTox() error {
+	if err := c.config.ValidateTransport(); err != nil {
+		return fmt.Errorf("invalid transport configuration: %w", err)
+	}
+
+	options := c.configureTransportOptions()
+	return c.createToxInstance(options)
+}
+
+// configureTransportOptions configures transport options based on config
+func (c *Client) configureTransportOptions() *toxcore.Options {
 	options := toxcore.NewOptions()
-	options.UDPEnabled = true
 
-	var tox *toxcore.Tox
-	var err error
-
-	// Load existing save data if available
-	saveData, readErr := os.ReadFile(c.config.SaveFile)
-	if readErr == nil {
+	if c.config.Transport.TorEnabled || c.config.Transport.I2PEnabled {
+		options.UDPEnabled = false
 		if c.config.Debug {
-			log.Printf("Loading existing save data from %s", c.config.SaveFile)
-		}
-		tox, err = toxcore.NewFromSavedata(options, saveData)
-		if err != nil {
-			return fmt.Errorf("failed to restore Tox from savedata: %w", err)
+			log.Printf("Anonymizing overlay enabled, disabling UDP")
 		}
 	} else {
-		tox, err = toxcore.New(options)
-		if err != nil {
-			return fmt.Errorf("failed to create Tox instance: %w", err)
-		}
-		// Set self info only for new instances
-		if err := tox.SelfSetName(c.config.Name); err != nil {
-			if c.config.Debug {
-				log.Printf("Warning: failed to set name: %v", err)
-			}
-		}
+		options.UDPEnabled = true
+	}
 
-		if err := tox.SelfSetStatusMessage(c.config.StatusMessage); err != nil {
-			if c.config.Debug {
-				log.Printf("Warning: failed to set status message: %v", err)
-			}
+	if c.config.Transport.TCPPort > 0 {
+		options.TCPPort = c.config.Transport.TCPPort
+	}
+
+	return options
+}
+
+// createToxInstance creates or restores a Tox instance
+func (c *Client) createToxInstance(options *toxcore.Options) error {
+	saveData, readErr := os.ReadFile(c.config.SaveFile)
+	if readErr == nil {
+		return c.restoreToxFromSavedata(options, saveData)
+	}
+	return c.createNewToxInstance(options)
+}
+
+// restoreToxFromSavedata restores Tox from existing save data
+func (c *Client) restoreToxFromSavedata(options *toxcore.Options, saveData []byte) error {
+	if c.config.Debug {
+		log.Printf("Loading existing save data from %s", c.config.SaveFile)
+	}
+	tox, err := toxcore.NewFromSavedata(options, saveData)
+	if err != nil {
+		return fmt.Errorf("failed to restore Tox from savedata: %w", err)
+	}
+	c.tox = tox
+	return nil
+}
+
+// createNewToxInstance creates a new Tox instance
+func (c *Client) createNewToxInstance(options *toxcore.Options) error {
+	tox, err := toxcore.New(options)
+	if err != nil {
+		return fmt.Errorf("failed to create Tox instance: %w", err)
+	}
+
+	if err := tox.SelfSetName(c.config.Name); err != nil {
+		if c.config.Debug {
+			log.Printf("Warning: failed to set name: %v", err)
+		}
+	}
+
+	if err := tox.SelfSetStatusMessage(c.config.StatusMessage); err != nil {
+		if c.config.Debug {
+			log.Printf("Warning: failed to set status message: %v", err)
 		}
 	}
 

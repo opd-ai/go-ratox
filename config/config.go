@@ -42,8 +42,21 @@ type Config struct {
 	// BootstrapNodes contains DHT bootstrap nodes
 	BootstrapNodes []BootstrapNode `json:"bootstrap_nodes"`
 
+	// Transport configures network transport options
+	Transport TransportConfig `json:"transport"`
+
 	// SaveFile is the path to the Tox save file
 	SaveFile string `json:"-"`
+}
+
+// TransportConfig holds transport layer configuration
+type TransportConfig struct {
+	TCPEnabled   bool   `json:"tcp_enabled"`
+	TCPPort      uint16 `json:"tcp_port"`
+	TorEnabled   bool   `json:"tor_enabled"`
+	TorSOCKSAddr string `json:"tor_socks_addr"`
+	I2PEnabled   bool   `json:"i2p_enabled"`
+	I2PSAMAddr   string `json:"i2p_sam_addr"`
 }
 
 // BootstrapNode represents a DHT bootstrap node
@@ -108,7 +121,15 @@ func Load(configDir string) (*Config, error) {
 		AutoAcceptFiles: false,
 		MaxFileSize:     100 * 1024 * 1024, // 100MB default
 		BootstrapNodes:  DefaultBootstrapNodes,
-		SaveFile:        saveFile,
+		Transport: TransportConfig{
+			TCPEnabled:   false,
+			TCPPort:      33445,
+			TorEnabled:   false,
+			TorSOCKSAddr: "127.0.0.1:9050",
+			I2PEnabled:   false,
+			I2PSAMAddr:   "127.0.0.1:7656",
+		},
+		SaveFile: saveFile,
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -252,4 +273,12 @@ func (c *Config) ConferenceDir(conferenceID string) string {
 // ConferenceFIFOPath returns the path for a conference-specific FIFO file
 func (c *Config) ConferenceFIFOPath(conferenceID, fifoName string) string {
 	return filepath.Join(c.ConferenceDir(conferenceID), fifoName)
+}
+
+// ValidateTransport validates transport configuration
+func (c *Config) ValidateTransport() error {
+	if c.Transport.TorEnabled && c.Transport.I2PEnabled {
+		return fmt.Errorf("Tor and I2P cannot be enabled simultaneously")
+	}
+	return nil
 }
