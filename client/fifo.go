@@ -557,21 +557,10 @@ func (fm *FIFOManager) handleFriendTextIn(friendID, message string) {
 	var publicKey [32]byte
 	copy(publicKey[:], publicKeyBytes)
 
-	// Find friend number by public key
-	var friendNum uint32
-	var found bool
-	fm.client.friendsMu.RLock()
-	for _, friend := range fm.client.friends {
-		if friend.PublicKey == publicKey {
-			friendNum = friend.ID
-			found = true
-			break
-		}
-	}
-	fm.client.friendsMu.RUnlock()
-
-	if !found {
-		log.Printf("Friend not found: %s", friendID)
+	// Find friend number by public key using toxcore API
+	friendNum, err := fm.client.tox.FriendByPublicKey(publicKey)
+	if err != nil {
+		log.Printf("Friend not found: %s (%v)", friendID, err)
 		return
 	}
 
@@ -612,21 +601,10 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	var publicKey [32]byte
 	copy(publicKey[:], publicKeyBytes)
 
-	// Find friend
-	var friendNum uint32
-	var found bool
-	fm.client.friendsMu.RLock()
-	for _, friend := range fm.client.friends {
-		if friend.PublicKey == publicKey {
-			friendNum = friend.ID
-			found = true
-			break
-		}
-	}
-	fm.client.friendsMu.RUnlock()
-
-	if !found {
-		log.Printf("Friend not found: %s", friendID)
+	// Find friend number by public key using toxcore API
+	friendNum, err := fm.client.tox.FriendByPublicKey(publicKey)
+	if err != nil {
+		log.Printf("Friend not found: %s (%v)", friendID, err)
 		return
 	}
 

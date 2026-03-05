@@ -284,15 +284,19 @@ Implementation:
 - ✅ Maintains responsive shutdown behavior via select statement
 - ✅ Tests pass with race detection
 
-#### Step 3.3: Use `FriendByPublicKey` for Lookups
+#### Step 3.3: Use `FriendByPublicKey` for Lookups ✅
+
+**Status:** COMPLETE
 
 **Goal:** Use toxcore's built-in friend lookup instead of iterating the map.
 
-1. Replace manual friend-by-public-key lookups in `fifo.go` (`handleFriendTextIn`, `handleFriendFileIn`) with:
-   ```go
-   friendNum, err := c.client.tox.FriendByPublicKey(publicKey)
-   ```
-2. This avoids iterating `c.friends` while holding a read lock.
+Implementation:
+- ✅ Replaced manual friend lookups in `handleFriendTextIn` with `tox.FriendByPublicKey(publicKey)`
+- ✅ Replaced manual friend lookups in `handleFriendFileIn` with `tox.FriendByPublicKey(publicKey)`
+- ✅ Reduced cyclomatic complexity of `handleFriendTextIn` from 9 to 7 (22.2% improvement)
+- ✅ Reduced cyclomatic complexity of `handleFriendFileIn` from 12 to 10 (16.7% improvement)
+- ✅ Eliminated need to hold read lock while iterating friends map
+- ✅ Tests pass with race detection
 
 ### Phase 4: New Features
 
