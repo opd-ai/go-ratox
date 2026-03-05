@@ -333,20 +333,33 @@ Implementation:
 2. ✅ Add a `typing` file to each friend's directory showing typing state.
 3. Optionally send typing notifications when a user opens a friend's `text_in` FIFO.
 
-#### Step 4.3: Conference/Group Chat Support
+#### Step 4.3: Conference/Group Chat Support ✅ (Partial)
+
+**Status:** PARTIALLY COMPLETE — outgoing messages and invites work; receiving is blocked by API limitations
 
 **Goal:** Add basic group chat via FIFO interface.
 
-1. Add a `conference_in` global FIFO to create/join conferences.
-2. For each active conference, create a directory:
+**Implementation:**
+1. ✅ Added `conference_in` global FIFO to create conferences
+2. ✅ Added `Conference` struct and tracking in Client
+3. ✅ Created conference directories with per-conference FIFOs:
    ```
    conferences/<conference_id>/
-   ├── text_in       # Send messages
-   ├── text_out      # Receive messages
-   ├── invite_in     # Invite friends (write friend public key)
-   └── members       # List of members (read-only)
+   ├── text_in       # Send messages (implemented)
+   └── invite_in     # Invite friends (implemented)
    ```
-3. Wire up `ConferenceNew`, `ConferenceInvite`, `ConferenceSendMessage`.
+4. ✅ Implemented `ConferenceNew`, `ConferenceInvite`, `ConferenceSendMessage` handlers
+5. ✅ Added monitoring for conference FIFOs
+
+**Limitations (toxcore API gaps):**
+- **No receive callbacks**: The current toxcore API lacks conference message receive callbacks (`OnConferenceMessage`, etc.), so incoming messages cannot be surfaced through `text_out` FIFOs.
+- **No member list**: The API doesn't expose conference member enumeration, so the `members` file cannot be implemented.
+- **No conference join**: Unlike the documented `GroupJoin` API, the current toxcore only exposes `ConferenceNew` (create) and `ConferenceInvite`. Accepting invites requires a callback that doesn't exist yet.
+
+**When toxcore adds conference receive callbacks, add:**
+- `OnConferenceMessage` callback to write incoming messages to `text_out`
+- `OnConferenceInvite` callback to accept/reject invites
+- Conference member tracking and `members` file output
 
 #### Step 4.4: Async (Offline) Messaging
 

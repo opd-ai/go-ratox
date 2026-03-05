@@ -29,6 +29,10 @@ type Client struct {
 	friends   map[uint32]*Friend
 	friendsMu sync.RWMutex
 
+	// Conference management
+	conferences   map[uint32]*Conference
+	conferencesMu sync.RWMutex
+
 	// File transfer tracking
 	incomingTransfers map[string]*incomingTransfer
 	outgoingTransfers map[string]*outgoingTransfer
@@ -65,6 +69,12 @@ type Friend struct {
 	LastSeen      time.Time
 }
 
+// Conference represents an active conference/group chat
+type Conference struct {
+	ID      uint32
+	Created time.Time
+}
+
 // New creates a new Tox client instance
 func New(cfg *config.Config) (*Client, error) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -74,6 +84,7 @@ func New(cfg *config.Config) (*Client, error) {
 		ctx:               ctx,
 		cancel:            cancel,
 		friends:           make(map[uint32]*Friend),
+		conferences:       make(map[uint32]*Conference),
 		incomingTransfers: make(map[string]*incomingTransfer),
 		outgoingTransfers: make(map[string]*outgoingTransfer),
 		shutdown:          make(chan struct{}),
@@ -500,3 +511,39 @@ func (c *Client) UpdateSelfStatusMessage(message string) error {
 	c.config.StatusMessage = message
 	return c.config.Save()
 }
+
+// CreateConference creates a new conference and returns its ID
+func (c *Client) CreateConference() (uint32, error) {
+	conferenceID, err := c.tox.ConferenceNew()
+	if err != nil {
+		return 0, fmt.Errorf("failed to create conference: %w", err)
+	}
+
+	conference := &Conference{
+		ID:      conferenceID,
+		Created: time.Now(),
+	}
+
+	c.conferencesMu.Lock()
+	c.conferences[conferenceID] = conference
+	c.conferencesMu.Unlock()
+
+	c.saveToxData()
+
+	return conferenceID, nil
+}
+
+// SendConferenceMessage sends a message to a conference
+func (c *Client) SendConferenceMessage(conferenceID uint32, message string) error {
+	if len(message) == 0 {
+		return fmt.Errorf("message cannot be empty")
+	}
+
+	return c.tox.ConferenceSendMessage(conferenceID, message, toxcore.MessageTypeNormal)
+}
+
+// InviteToConference invites a friend to a conference
+func (c *Client) InviteToConference(friendID, conferenceID uint32) error {
+	return c.tox.ConferenceInvite(friendID, conferenceID)
+}
+

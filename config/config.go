@@ -243,3 +243,13 @@ func (c *Config) GlobalFIFOPath(name string) string {
 func (c *Config) FriendFIFOPath(friendID, fifoName string) string {
 	return filepath.Join(c.FriendDir(friendID), fifoName)
 }
+
+// ConferenceDir returns the directory path for a specific conference
+func (c *Config) ConferenceDir(conferenceID string) string {
+	return filepath.Join(c.ConfigDir, "conferences", conferenceID)
+}
+
+// ConferenceFIFOPath returns the path for a conference-specific FIFO file
+func (c *Config) ConferenceFIFOPath(conferenceID, fifoName string) string {
+	return filepath.Join(c.ConferenceDir(conferenceID), fifoName)
+}

@@ -53,6 +53,7 @@ const (
 	StatusMessage    = "status_message"    // Write-only - set status message
 	ID               = "id"                // Read-only - Tox ID file
 	ConnectionStatus = "connection_status" // Read-only - connection status info
+	ConferenceIn     = "conference_in"     // Write-only - create/join conferences
 
 	// Friend-specific FIFOs
 	TextIn              = "text_in"        // Write-only - send messages
@@ -63,6 +64,10 @@ const (
 	FriendStatusMessage = "status_message" // Read-only - friend status message
 	RemoveIn            = "remove_in"      // Write-only - remove friend
 	Typing              = "typing"         // Read-only - typing indicator
+
+	// Conference-specific FIFOs (per-conference directory)
+	ConferenceTextIn   = "text_in"   // Write-only - send conference messages
+	ConferenceInviteIn = "invite_in" // Write-only - invite friends to conference
 
 	// FIFO permissions
 	FIFOPermInput  = 0o600 // Read/write for owner
@@ -127,6 +132,7 @@ func (fm *FIFOManager) createGlobalFIFOs() error {
 		{RequestOut, false, true},
 		{Name, true, false},
 		{StatusMessage, true, false},
+		{ConferenceIn, true, false},
 	}
 
 	for _, fifo := range globalFIFOs {
@@ -187,6 +193,34 @@ func (fm *FIFOManager) CreateFriendFIFOs(friendID string) error {
 
 	return nil
 }
+
+// createConferenceFIFOs creates FIFO files for a conference
+func (fm *FIFOManager) createConferenceFIFOs(conferenceID uint32) error {
+	conferenceIDStr := fmt.Sprintf("%d", conferenceID)
+	conferenceDir := fm.config.ConferenceDir(conferenceIDStr)
+	if err := os.MkdirAll(conferenceDir, DirPerm); err != nil {
+		return fmt.Errorf("failed to create conference directory: %w", err)
+	}
+
+	conferenceFIFOs := []struct {
+		name     string
+		isInput  bool
+		isOutput bool
+	}{
+		{ConferenceTextIn, true, false},
+		{ConferenceInviteIn, true, false},
+	}
+
+	for _, fifo := range conferenceFIFOs {
+		path := fm.config.ConferenceFIFOPath(conferenceIDStr, fifo.name)
+		if err := fm.createFIFO(path, fifo.isInput, fifo.isOutput); err != nil {
+			return fmt.Errorf("failed to create FIFO %s: %w", fifo.name, err)
+		}
+	}
+
+	return nil
+}
+
 
 // createFIFO creates a named pipe with the specified permissions
 func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
@@ -327,6 +361,13 @@ func (fm *FIFOManager) monitorGlobalFIFOs(ctx context.Context) {
 		fm.monitorSingleFIFO(ctx, fm.config.GlobalFIFOPath(StatusMessage), fm.handleStatusMessageChange)
 	}()
 
+	// Monitor conference_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		fm.monitorSingleFIFO(ctx, fm.config.GlobalFIFOPath(ConferenceIn), fm.handleConferenceIn)
+	}()
+
 	// Wait for all monitoring goroutines to finish
 	wg.Wait()
 }
@@ -412,6 +453,35 @@ func (fm *FIFOManager) monitorFriendFIFOs(ctx context.Context, friendID string) 
 		defer wg.Done()
 		removeInPath := fm.config.FriendFIFOPath(friendID, RemoveIn)
 		fm.monitorSingleFIFO(ctx, removeInPath, func(data string) { fm.handleFriendRemoveIn(friendID, data) })
+	}()
+
+	// Wait for all monitoring goroutines to finish
+	wg.Wait()
+}
+
+// monitorConferenceFIFOs monitors FIFO files for a conference
+func (fm *FIFOManager) monitorConferenceFIFOs(ctx context.Context, conferenceID uint32) {
+	conferenceIDStr := fmt.Sprintf("%d", conferenceID)
+	var wg sync.WaitGroup
+
+	// Monitor text_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		textInPath := fm.config.ConferenceFIFOPath(conferenceIDStr, ConferenceTextIn)
+		fm.monitorSingleFIFO(ctx, textInPath, func(data string) {
+			fm.handleConferenceTextIn(conferenceID, data)
+		})
+	}()
+
+	// Monitor invite_in
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		inviteInPath := fm.config.ConferenceFIFOPath(conferenceIDStr, ConferenceInviteIn)
+		fm.monitorSingleFIFO(ctx, inviteInPath, func(data string) {
+			fm.handleConferenceInviteIn(conferenceID, data)
+		})
 	}()
 
 	// Wait for all monitoring goroutines to finish
@@ -543,6 +613,34 @@ func (fm *FIFOManager) handleStatusMessageChange(message string) {
 
 	if err := fm.client.UpdateSelfStatusMessage(message); err != nil {
 		log.Printf("Failed to update status message: %v", err)
+	}
+}
+
+// handleConferenceIn processes conference creation requests
+func (fm *FIFOManager) handleConferenceIn(input string) {
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return
+	}
+
+	// Create a new conference
+	conferenceID, err := fm.client.CreateConference()
+	if err != nil {
+		log.Printf("Failed to create conference: %v", err)
+		return
+	}
+
+	// Create conference directory and FIFOs
+	if err := fm.createConferenceFIFOs(conferenceID); err != nil {
+		log.Printf("Failed to create conference FIFOs: %v", err)
+		return
+	}
+
+	// Start monitoring conference FIFOs
+	go fm.monitorConferenceFIFOs(fm.ctx, conferenceID)
+
+	if fm.config.Debug {
+		log.Printf("Created conference %d", conferenceID)
 	}
 }
 
@@ -824,5 +922,47 @@ func (fm *FIFOManager) cleanupUnusedFIFOs() {
 // isGlobalFIFO returns true if the path is a global FIFO
 func isGlobalFIFO(path string) bool {
 	name := filepath.Base(path)
-	return name == RequestIn || name == RequestOut || name == Name || name == StatusMessage
+	return name == RequestIn || name == RequestOut || name == Name || name == StatusMessage || name == ConferenceIn
 }
+
+// handleConferenceTextIn processes outgoing conference messages
+func (fm *FIFOManager) handleConferenceTextIn(conferenceID uint32, message string) {
+	message = strings.TrimSpace(message)
+	if message == "" {
+		return
+	}
+
+	if err := fm.client.SendConferenceMessage(conferenceID, message); err != nil {
+		log.Printf("Failed to send conference message: %v", err)
+	}
+}
+
+// handleConferenceInviteIn processes conference invite requests
+func (fm *FIFOManager) handleConferenceInviteIn(conferenceID uint32, friendID string) {
+	friendID = strings.TrimSpace(friendID)
+	if friendID == "" {
+		return
+	}
+
+	// Convert hex friend ID to friend number
+	publicKeyBytes, err := hex.DecodeString(friendID)
+	if err != nil {
+		log.Printf("Invalid friend ID for conference invite: %v", err)
+		return
+	}
+
+	var publicKey [32]byte
+	copy(publicKey[:], publicKeyBytes)
+
+	// Look up friend number
+	friendNum, err := fm.client.tox.FriendByPublicKey(publicKey)
+	if err != nil {
+		log.Printf("Friend not found for conference invite: %v", err)
+		return
+	}
+
+	if err := fm.client.InviteToConference(friendNum, conferenceID); err != nil {
+		log.Printf("Failed to invite friend to conference: %v", err)
+	}
+}
+
