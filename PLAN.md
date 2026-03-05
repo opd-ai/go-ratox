@@ -272,24 +272,17 @@ These steps adopt better APIs available in the updated toxcore.
    ```
 2. After `NewFromSavedata`, the friend list, name, and status are already restored — skip manual re-setting if present.
 
-#### Step 3.2: Use `IterationInterval()` for Dynamic Tick Rate
+#### Step 3.2: Use `IterationInterval()` for Dynamic Tick Rate ✅
+
+**Status:** COMPLETE
 
 **Goal:** Use toxcore's recommended iteration interval.
 
-1. In the main loop in `Run()`, replace the hardcoded ticker:
-   ```go
-   for {
-       select {
-       case <-c.ctx.Done():
-           return nil
-       case <-c.shutdown:
-           return nil
-       default:
-           c.tox.Iterate()
-           time.Sleep(c.tox.IterationInterval())
-       }
-   }
-   ```
+Implementation:
+- ✅ Replaced hardcoded 50ms ticker with dynamic `IterationInterval()`
+- ✅ Changed from ticker-based select to default case with sleep
+- ✅ Maintains responsive shutdown behavior via select statement
+- ✅ Tests pass with race detection
 
 #### Step 3.3: Use `FriendByPublicKey` for Lookups
 

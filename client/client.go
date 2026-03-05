@@ -274,18 +274,16 @@ func (c *Client) Run() error {
 		c.updateConnectionStatus()
 	}()
 
-	// Main Tox iteration loop
-	ticker := time.NewTicker(50 * time.Millisecond)
-	defer ticker.Stop()
-
+	// Main Tox iteration loop with dynamic interval
 	for {
 		select {
 		case <-c.ctx.Done():
 			return nil
 		case <-c.shutdown:
 			return nil
-		case <-ticker.C:
+		default:
 			c.tox.Iterate()
+			time.Sleep(c.tox.IterationInterval())
 		}
 	}
 }
