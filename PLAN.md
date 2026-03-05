@@ -127,6 +127,31 @@ The following gaps have been identified by auditing the go-ratox client against 
 
 **Files:** `client/fifo.go`
 
+### Gap 13: Alternate Transport Support
+
+**Status:** Missing — only UDP transport is enabled; TCP relay and encrypted transports are not used.
+
+**Files:** `client/client.go`, `config/config.go`
+
+**Details:**
+- The toxcore API provides pluggable transports: UDP (`transport.NewUDPTransport()`), TCP relay support, Noise-IK encryption (`transport.NewNoiseTransport()`), and version-negotiating transport (`transport.NewNegotiatingTransport()` for automatic legacy/Noise-IK fallback).
+- go-ratox currently only sets `options.UDPEnabled = true` and does not expose any configuration for TCP relay connections or encrypted transport layers.
+- Enabling TCP relay support would allow connectivity through restrictive NATs and firewalls where UDP is blocked.
+- Wrapping transports with Noise-IK provides forward secrecy beyond the standard Tox encryption.
+- `NegotiatingTransport` enables seamless interoperability between legacy and Noise-IK peers.
+
+### Gap 14: Bootstrap Node Mode
+
+**Status:** Missing — go-ratox only connects to bootstrap nodes as a client; it cannot act as one.
+
+**Files:** `client/client.go`, `config/config.go`, `main.go`
+
+**Details:**
+- go-ratox currently bootstraps by connecting to external DHT nodes listed in the configuration, but it does not expose functionality to operate as a DHT bootstrap or relay node itself.
+- The toxcore API supports DHT node operation and TCP relay serving, which would allow a go-ratox instance to help other Tox clients join the network.
+- Acting as a bootstrap node requires listening on a configurable address/port, advertising the node's public key, and serving DHT and relay requests.
+- This would enable self-hosted Tox infrastructure without relying on third-party public bootstrap nodes.
+
 ---
 
 ## Step-by-Step Completion Plan
@@ -335,6 +360,55 @@ These steps add new capabilities exposed by the updated toxcore.
 2. Messages sent to offline friends are already queued by toxcore's async manager — no FIFO changes needed for outgoing.
 3. Incoming async messages should appear in the same `text_out` FIFO as real-time messages, with a marker indicating they were delivered asynchronously.
 
+#### Step 4.5: Alternate Transport Support
+
+**Goal:** Enable TCP relay and encrypted transport layers for improved connectivity and security.
+
+1. Add transport configuration fields to `Config`:
+   ```go
+   type TransportConfig struct {
+       TCPEnabled       bool   `json:"tcp_enabled"`
+       TCPPort          uint16 `json:"tcp_port"`
+       NoiseEnabled     bool   `json:"noise_enabled"`
+       NegotiateVersion bool   `json:"negotiate_version"`
+   }
+   ```
+2. In `initTox()`, configure the transport based on settings:
+   ```go
+   if c.config.Transport.TCPEnabled {
+       options.TCPEnabled = true
+       options.TCPPort = c.config.Transport.TCPPort
+   }
+   ```
+3. When `NoiseEnabled` is true, wrap the transport with `transport.NewNoiseTransport()` for Noise-IK forward secrecy.
+4. When `NegotiateVersion` is true, use `transport.NewNegotiatingTransport()` to support automatic fallback between Noise-IK and legacy protocols.
+5. Add a global `transport` status file exposing the active transport type (UDP, TCP, Noise-IK).
+6. Update default configuration to include transport options (TCP disabled by default for backward compatibility).
+
+#### Step 4.6: Bootstrap Node Mode
+
+**Goal:** Allow go-ratox to act as a DHT bootstrap and relay node for other Tox clients.
+
+1. Add bootstrap node configuration fields to `Config`:
+   ```go
+   type BootstrapServerConfig struct {
+       Enabled    bool   `json:"enabled"`
+       ListenAddr string `json:"listen_addr"`
+       ListenPort uint16 `json:"listen_port"`
+       Motd       string `json:"motd"`
+       TCPRelay   bool   `json:"tcp_relay"`
+   }
+   ```
+2. Implement a `BootstrapServer` component in a new `bootstrap/` package:
+   - Listen on the configured address/port for incoming DHT requests.
+   - Serve DHT node discovery responses to joining clients.
+   - Optionally serve as a TCP relay for peers behind restrictive NATs.
+3. Expose the node's public key and address for other clients to use:
+   - Write to a `bootstrap_info` file in the config directory containing the node's address, port, and public key.
+4. Add a CLI flag (`--bootstrap-node`) or config option to start in bootstrap node mode.
+5. When running as a bootstrap node, the client can optionally also operate as a regular Tox client simultaneously.
+6. Log bootstrap node activity (connections served, relay sessions) for monitoring.
+
 ### Phase 5: Robustness & Quality
 
 #### Step 5.1: Add Client Package Tests
@@ -398,7 +472,9 @@ These steps add new capabilities exposed by the updated toxcore.
 | P3 | 4.1, 4.2 | Medium | Friend management and UX improvements |
 | P4 | 5.1, 5.2, 5.3 | Medium | Quality and test coverage |
 | P5 | 4.3, 4.4 | High | New features (group chat, offline messaging) |
-| P6 | 6.1, 6.2, 6.3 | Low | Documentation updates |
+| P6 | 4.5 | Medium | Alternate transports for improved connectivity and security |
+| P7 | 4.6 | High | Bootstrap node mode for self-hosted Tox infrastructure |
+| P8 | 6.1, 6.2, 6.3 | Low | Documentation updates |
 
 ## Verification
 
