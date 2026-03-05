@@ -162,23 +162,19 @@ The following gaps have been identified by auditing the go-ratox client against 
 
 These steps fix broken or incomplete core features.
 
-#### Step 1.1: Complete File Receive Chunk Handling
+#### Step 1.1: Complete File Receive Chunk Handling ✅
+
+**Status:** COMPLETE
 
 **Goal:** Write incoming file data to disk instead of just logging.
 
-1. Add a `fileTransfers` map to `Client` tracking active incoming transfers:
-   ```go
-   type incomingTransfer struct {
-       File     *os.File
-       Filename string
-       FileSize uint64
-       Received uint64
-   }
-   incomingTransfers map[string]*incomingTransfer // key: "friendID:fileNumber"
-   ```
-2. In `handleFileReceive`, create a destination file in the friend's directory when a transfer is accepted.
-3. In `handleFileReceiveChunk`, write chunk data to the destination file at the correct position.
-4. When `data` is empty (transfer complete), close the file and notify via `file_out` FIFO.
+Implementation:
+- ✅ Added `incomingTransfer` struct to track active incoming transfers
+- ✅ Added `incomingTransfers` map to `Client` (key: "friendID:fileNumber")
+- ✅ In `handleFileReceive`, create destination file and register transfer when auto-accepting
+- ✅ In `handleFileReceiveChunk`, write chunk data to file at correct position
+- ✅ Handle transfer completion (empty chunk) by closing file and notifying via `file_out` FIFO
+- ✅ Refactored into helper functions to maintain low complexity
 
 #### Step 1.2: Complete File Send Chunk Handling
 
@@ -198,15 +194,16 @@ These steps fix broken or incomplete core features.
 3. In `handleFileChunkRequest`, read `length` bytes from the file at `position` and call `FileSendChunk`.
 4. When `length` is 0, the transfer is complete — close the file and clean up.
 
-#### Step 1.3: Implement File Transfer Rejection
+#### Step 1.3: Implement File Transfer Rejection ✅
+
+**Status:** COMPLETE
 
 **Goal:** Properly reject oversized file transfers.
 
-1. In `handleFileReceive`, when file size exceeds `MaxFileSize`:
-   ```go
-   c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel)
-   ```
-2. Log the rejection and notify via `file_out` FIFO.
+Implementation:
+- ✅ In `handleFileReceive`, check file size against `MaxFileSize`
+- ✅ Call `FileControl` with `FileControlCancel` to reject oversized files
+- ✅ Log the rejection with file size details
 
 ### Phase 2: Connection & Status Tracking
 

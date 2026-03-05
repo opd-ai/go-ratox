@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/opd-ai/toxcore"
@@ -140,8 +141,7 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 
 	// Check file size limits
 	if c.config.MaxFileSize > 0 && int64(fileSize) > c.config.MaxFileSize {
-		log.Printf("File too large (%d bytes), rejecting", fileSize)
-		// TODO: Implement file control rejection
+		c.rejectFileTransfer(friendID, fileNumber, fileSize)
 		return
 	}
 
@@ -155,34 +155,123 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 
 	// Auto-accept files if configured
 	if c.config.AutoAcceptFiles {
-		// Use FileControl to accept the transfer
-		if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlResume); err != nil {
-			log.Printf("Failed to accept file transfer: %v", err)
-		} else {
-			log.Printf("Auto-accepted file transfer: %s", filename)
-		}
+		c.acceptFileTransfer(friendID, fileNumber, friendIDStr, filename, fileSize)
+	}
+}
+
+func (c *Client) rejectFileTransfer(friendID uint32, fileNumber uint32, fileSize uint64) {
+	log.Printf("File too large (%d bytes), rejecting", fileSize)
+	if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel); err != nil {
+		log.Printf("Failed to reject file transfer: %v", err)
+	}
+}
+
+func (c *Client) acceptFileTransfer(friendID uint32, fileNumber uint32, friendIDStr, filename string, fileSize uint64) {
+	friendDir := c.config.FriendDir(friendIDStr)
+	destPath := fmt.Sprintf("%s/%s", friendDir, filename)
+	
+	file, err := os.Create(destPath)
+	if err != nil {
+		log.Printf("Failed to create destination file: %v", err)
+		c.cancelFileTransfer(friendID, fileNumber)
+		return
+	}
+
+	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
+	c.transfersMu.Lock()
+	c.incomingTransfers[transferKey] = &incomingTransfer{
+		File:     file,
+		Filename: filename,
+		FileSize: fileSize,
+		Received: 0,
+	}
+	c.transfersMu.Unlock()
+
+	if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlResume); err != nil {
+		log.Printf("Failed to accept file transfer: %v", err)
+		file.Close()
+		c.transfersMu.Lock()
+		delete(c.incomingTransfers, transferKey)
+		c.transfersMu.Unlock()
+	} else {
+		log.Printf("Auto-accepted file transfer: %s", filename)
+	}
+}
+
+func (c *Client) cancelFileTransfer(friendID uint32, fileNumber uint32) {
+	if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel); err != nil {
+		log.Printf("Failed to cancel file transfer: %v", err)
 	}
 }
 
 // handleFileReceiveChunk processes incoming file data chunks
 func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, position uint64, data []byte) {
-	if c.config.Debug {
-		c.friendsMu.RLock()
-		friend, exists := c.friends[friendID]
-		c.friendsMu.RUnlock()
+	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
+	
+	c.transfersMu.Lock()
+	transfer, exists := c.incomingTransfers[transferKey]
+	c.transfersMu.Unlock()
 
-		if exists {
-			log.Printf("File chunk from %s: file %d, position %d, size %d", friend.Name, fileNumber, position, len(data))
+	if !exists {
+		if c.config.Debug {
+			log.Printf("Received chunk for unknown transfer: %s", transferKey)
+		}
+		return
+	}
+
+	if len(data) == 0 {
+		c.completeFileReceive(friendID, transferKey, transfer)
+		return
+	}
+
+	if err := c.writeFileChunk(transfer, position, data); err != nil {
+		c.abortFileReceive(friendID, fileNumber, transferKey, transfer)
+		return
+	}
+
+	if c.config.Debug {
+		log.Printf("Received file chunk: %d bytes at position %d (%d/%d total)", 
+			len(data), position, transfer.Received, transfer.FileSize)
+	}
+}
+
+func (c *Client) completeFileReceive(friendID uint32, transferKey string, transfer *incomingTransfer) {
+	transfer.File.Close()
+	
+	c.transfersMu.Lock()
+	delete(c.incomingTransfers, transferKey)
+	c.transfersMu.Unlock()
+
+	log.Printf("File transfer completed: %s (%d bytes)", transfer.Filename, transfer.Received)
+	
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+	
+	if exists {
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		completionMsg := fmt.Sprintf("COMPLETE %s %d", transfer.Filename, transfer.Received)
+		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
+			log.Printf("Failed to write file completion notification: %v", err)
 		}
 	}
+}
 
-	// Basic implementation: For now, just log the received chunk
-	// In a full implementation, this would write chunks to a file
-	if len(data) == 0 {
-		log.Printf("File transfer completed for file %d from friend %d", fileNumber, friendID)
-	} else {
-		log.Printf("Received file chunk: %d bytes at position %d", len(data), position)
+func (c *Client) writeFileChunk(transfer *incomingTransfer, position uint64, data []byte) error {
+	if _, err := transfer.File.WriteAt(data, int64(position)); err != nil {
+		log.Printf("Failed to write file chunk: %v", err)
+		return err
 	}
+	transfer.Received += uint64(len(data))
+	return nil
+}
+
+func (c *Client) abortFileReceive(friendID uint32, fileNumber uint32, transferKey string, transfer *incomingTransfer) {
+	transfer.File.Close()
+	c.transfersMu.Lock()
+	delete(c.incomingTransfers, transferKey)
+	c.transfersMu.Unlock()
+	c.cancelFileTransfer(friendID, fileNumber)
 }
 
 // handleFileChunkRequest processes outgoing file chunk requests

@@ -29,8 +29,29 @@ type Client struct {
 	friends   map[uint32]*Friend
 	friendsMu sync.RWMutex
 
+	// File transfer tracking
+	incomingTransfers  map[string]*incomingTransfer
+	outgoingTransfers  map[string]*outgoingTransfer
+	transfersMu        sync.RWMutex
+
 	// Shutdown channel
 	shutdown chan struct{}
+}
+
+// incomingTransfer tracks an active incoming file transfer
+type incomingTransfer struct {
+	File     *os.File
+	Filename string
+	FileSize uint64
+	Received uint64
+}
+
+// outgoingTransfer tracks an active outgoing file transfer
+type outgoingTransfer struct {
+	File     *os.File
+	Filename string
+	FileSize uint64
+	Sent     uint64
 }
 
 // Friend represents a Tox friend with associated metadata
@@ -48,11 +69,13 @@ func New(cfg *config.Config) (*Client, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	client := &Client{
-		config:   cfg,
-		ctx:      ctx,
-		cancel:   cancel,
-		friends:  make(map[uint32]*Friend),
-		shutdown: make(chan struct{}),
+		config:            cfg,
+		ctx:               ctx,
+		cancel:            cancel,
+		friends:           make(map[uint32]*Friend),
+		incomingTransfers: make(map[string]*incomingTransfer),
+		outgoingTransfers: make(map[string]*outgoingTransfer),
+		shutdown:          make(chan struct{}),
 	}
 
 	// Initialize Tox
