@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/opd-ai/toxcore"
+	"github.com/opd-ai/toxcore/async"
 )
 
 // handleFriendRequest processes incoming friend requests
@@ -456,5 +457,42 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 	} else if c.config.Debug {
 		log.Printf("Sent file chunk: %d bytes at position %d (%d/%d total)",
 			n, position, transfer.Sent, transfer.FileSize)
+	}
+}
+
+// handleAsyncMessage processes async messages (offline messages)
+func (c *Client) handleAsyncMessage(senderPK [32]byte, message string, messageType async.MessageType) {
+	friendID, err := c.tox.GetFriendByPublicKey(senderPK)
+	if err != nil {
+		log.Printf("Received async message from unknown sender: %v", err)
+		return
+	}
+
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+
+	if !exists {
+		log.Printf("Received async message from friend %d not in map", friendID)
+		return
+	}
+
+	timestamp := time.Now().Format("15:04:05")
+	var formattedMessage string
+
+	switch messageType {
+	case async.MessageTypeAction:
+		formattedMessage = fmt.Sprintf("[%s] [ASYNC] * %s %s", timestamp, friend.Name, message)
+	default:
+		formattedMessage = fmt.Sprintf("[%s] [ASYNC] <%s> %s", timestamp, friend.Name, message)
+	}
+
+	friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+	if err := c.fifoManager.WriteFriendTextOut(friendIDStr, formattedMessage); err != nil {
+		log.Printf("Failed to write async message to text_out FIFO: %v", err)
+	}
+
+	if c.config.Debug {
+		log.Printf("Async message from %s (%d): %s", friend.Name, friendID, message)
 	}
 }

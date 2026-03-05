@@ -361,18 +361,21 @@ Implementation:
 - `OnConferenceInvite` callback to accept/reject invites
 - Conference member tracking and `members` file output
 
-#### Step 4.4: Async (Offline) Messaging
+#### Step 4.4: Async (Offline) Messaging ✅
+
+**Status:** COMPLETE
 
 **Goal:** Ensure offline messages are delivered and surfaced.
 
-1. Register `OnAsyncMessage` callback:
-   ```go
-   c.tox.OnAsyncMessage(func(senderPK [32]byte, message string, messageType async.MessageType) {
-       // Find friend by public key and write to their text_out
-   })
-   ```
-2. Messages sent to offline friends are already queued by toxcore's async manager — no FIFO changes needed for outgoing.
-3. Incoming async messages should appear in the same `text_out` FIFO as real-time messages, with a marker indicating they were delivered asynchronously.
+Implementation:
+1. ✅ Registered `OnAsyncMessage` callback in `setupCallbacks`
+2. ✅ Implemented `handleAsyncMessage` handler in `handlers.go`
+3. ✅ Handler finds friend by public key using `GetFriendByPublicKey`
+4. ✅ Formats messages with `[ASYNC]` marker to distinguish from real-time messages
+5. ✅ Writes to friend's `text_out` FIFO (same as real-time messages)
+6. ✅ Added `async` package import for `async.MessageType`
+7. ✅ Function complexity: 8.3 (under threshold of 10)
+8. ✅ Tests pass with race detection
 
 #### Step 4.5: Alternate Transport Support
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/opd-ai/go-ratox/config"
 	"github.com/opd-ai/toxcore"
+	"github.com/opd-ai/toxcore/async"
 )
 
 // Client represents the main Tox client with FIFO interface
@@ -213,6 +214,11 @@ func (c *Client) setupCallbacks() {
 	// Friend typing callback
 	c.tox.OnFriendTyping(func(friendID uint32, isTyping bool) {
 		c.handleFriendTyping(friendID, isTyping)
+	})
+
+	// Async message callback
+	c.tox.OnAsyncMessage(func(senderPK [32]byte, message string, messageType async.MessageType) {
+		c.handleAsyncMessage(senderPK, message, messageType)
 	})
 }
 
