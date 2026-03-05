@@ -221,7 +221,6 @@ func (fm *FIFOManager) createConferenceFIFOs(conferenceID uint32) error {
 	return nil
 }
 
-
 // createFIFO creates a named pipe with the specified permissions
 func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
 	// Clean up existing FIFO resources if they exist
@@ -965,4 +964,3 @@ func (fm *FIFOManager) handleConferenceInviteIn(conferenceID uint32, friendID st
 		log.Printf("Failed to invite friend to conference: %v", err)
 	}
 }
-

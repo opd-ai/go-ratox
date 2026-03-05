@@ -546,4 +546,3 @@ func (c *Client) SendConferenceMessage(conferenceID uint32, message string) erro
 func (c *Client) InviteToConference(friendID, conferenceID uint32) error {
 	return c.tox.ConferenceInvite(friendID, conferenceID)
 }
-
