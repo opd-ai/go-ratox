@@ -62,6 +62,7 @@ const (
 	Status              = "status"         // Read-only - friend status
 	FriendStatusMessage = "status_message" // Read-only - friend status message
 	RemoveIn            = "remove_in"      // Write-only - remove friend
+	Typing              = "typing"         // Read-only - typing indicator
 
 	// FIFO permissions
 	FIFOPermInput  = 0o600 // Read/write for owner
@@ -167,6 +168,7 @@ func (fm *FIFOManager) CreateFriendFIFOs(friendID string) error {
 		{Status, false, true},
 		{FriendStatusMessage, false, true},
 		{RemoveIn, true, false},
+		{Typing, false, true},
 	}
 
 	for _, fifo := range friendFIFOs {
@@ -772,6 +774,12 @@ func (fm *FIFOManager) WriteFriendStatus(friendID, status string) error {
 func (fm *FIFOManager) WriteFriendStatusMessage(friendID, statusMessage string) error {
 	path := fm.config.FriendFIFOPath(friendID, FriendStatusMessage)
 	return fm.writeFIFO(path, statusMessage)
+}
+
+// WriteFriendTyping writes typing status to a friend's typing FIFO
+func (fm *FIFOManager) WriteFriendTyping(friendID, typingStatus string) error {
+	path := fm.config.FriendFIFOPath(friendID, Typing)
+	return fm.writeFIFO(path, typingStatus)
 }
 
 // WriteFriendFileOut writes file transfer info to a friend's file_out FIFO

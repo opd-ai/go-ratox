@@ -198,6 +198,11 @@ func (c *Client) setupCallbacks() {
 	c.tox.OnFileChunkRequest(func(friendID, fileID uint32, position uint64, length int) {
 		c.handleFileChunkRequest(friendID, fileID, position, length)
 	})
+
+	// Friend typing callback
+	c.tox.OnFriendTyping(func(friendID uint32, isTyping bool) {
+		c.handleFriendTyping(friendID, isTyping)
+	})
 }
 
 // loadFriends loads existing friends from Tox save data

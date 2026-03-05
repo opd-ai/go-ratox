@@ -181,6 +181,31 @@ func (c *Client) handleFriendStatusMessageChange(friendID uint32, statusMessage 
 	}
 }
 
+// handleFriendTyping processes friend typing notifications
+func (c *Client) handleFriendTyping(friendID uint32, isTyping bool) {
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+
+	if !exists {
+		return
+	}
+
+	friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+	typingStr := "0"
+	if isTyping {
+		typingStr = "1"
+	}
+
+	if err := c.fifoManager.WriteFriendTyping(friendIDStr, typingStr); err != nil {
+		log.Printf("Failed to write typing status to FIFO: %v", err)
+	}
+
+	if c.config.Debug {
+		log.Printf("Friend %s (%d) typing: %v", friend.Name, friendID, isTyping)
+	}
+}
+
 // handleSelfConnectionStatusChange processes self connection status changes
 func (c *Client) handleSelfConnectionStatusChange(status toxcore.ConnectionStatus) {
 	// Update connection status file immediately

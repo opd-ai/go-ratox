@@ -320,17 +320,17 @@ Implementation:
 - ✅ Save Tox state after deletion
 - ✅ Refactored into helper functions to maintain low complexity (main handler: 7, under threshold of 10)
 
-#### Step 4.2: Typing Notifications
+#### Step 4.2: Typing Notifications ✅
 
 **Goal:** Surface typing indicators through the filesystem.
 
-1. Register `OnFriendTyping` callback:
+1. ✅ Register `OnFriendTyping` callback:
    ```go
    c.tox.OnFriendTyping(func(friendID uint32, isTyping bool) {
        c.handleFriendTyping(friendID, isTyping)
    })
    ```
-2. Add a `typing` file to each friend's directory showing typing state.
+2. ✅ Add a `typing` file to each friend's directory showing typing state.
 3. Optionally send typing notifications when a user opens a friend's `text_in` FIFO.
 
 #### Step 4.3: Conference/Group Chat Support
