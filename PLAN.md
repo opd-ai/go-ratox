@@ -205,20 +205,18 @@ Implementation:
 
 These steps ensure go-ratox accurately tracks friend and self connection state.
 
-#### Step 2.1: Register `OnFriendConnectionStatus` Callback
+#### Step 2.1: Register `OnFriendConnectionStatus` Callback ✅
+
+**Status:** COMPLETE
 
 **Goal:** Track when friends come online or go offline.
 
-1. In `setupCallbacks`, add:
-   ```go
-   c.tox.OnFriendConnectionStatus(func(friendID uint32, status toxcore.ConnectionStatus) {
-       c.handleFriendConnectionStatusChange(friendID, status)
-   })
-   ```
-2. Implement `handleFriendConnectionStatusChange` in `handlers.go`:
-   - Update `friend.Online` based on `status != ConnectionNone`.
-   - Write connection status to friend's `status` FIFO.
-   - Log the change in debug mode.
+Implementation:
+- ✅ Added `OnFriendConnectionStatus` callback in `setupCallbacks`
+- ✅ Implemented `handleFriendConnectionStatusChange` in `handlers.go`
+- ✅ Updates `friend.Online` based on `status != ConnectionNone`
+- ✅ Writes connection status to friend's `status` FIFO with proper status strings (offline/online (TCP)/online (UDP))
+- ✅ Logs connection status changes in debug mode
 
 #### Step 2.2: Register `OnConnectionStatus` Callback
 

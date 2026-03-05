@@ -166,6 +166,11 @@ func (c *Client) setupCallbacks() {
 		c.handleFriendStatusChange(friendID, int(status))
 	})
 
+	// Friend connection status callback
+	c.tox.OnFriendConnectionStatus(func(friendID uint32, status toxcore.ConnectionStatus) {
+		c.handleFriendConnectionStatusChange(friendID, status)
+	})
+
 	// File receive callback
 	c.tox.OnFileRecv(func(friendID, fileID, kind uint32, fileSize uint64, filename string) {
 		c.handleFileReceive(friendID, fileID, int(kind), fileSize, filename)

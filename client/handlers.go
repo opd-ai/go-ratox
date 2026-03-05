@@ -125,6 +125,40 @@ func (c *Client) handleFriendStatusChange(friendID uint32, status int) {
 	}
 }
 
+// handleFriendConnectionStatusChange processes friend connection status changes
+func (c *Client) handleFriendConnectionStatusChange(friendID uint32, status toxcore.ConnectionStatus) {
+	c.friendsMu.Lock()
+	friend, exists := c.friends[friendID]
+	if exists {
+		friend.Online = status != toxcore.ConnectionNone
+	}
+	c.friendsMu.Unlock()
+
+	if exists {
+		// Write connection status to friend's status FIFO
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		var statusStr string
+		switch status {
+		case toxcore.ConnectionNone:
+			statusStr = "offline"
+		case toxcore.ConnectionTCP:
+			statusStr = "online (TCP)"
+		case toxcore.ConnectionUDP:
+			statusStr = "online (UDP)"
+		default:
+			statusStr = "unknown"
+		}
+
+		if err := c.fifoManager.WriteFriendStatus(friendIDStr, statusStr); err != nil {
+			log.Printf("Failed to write connection status to FIFO: %v", err)
+		}
+
+		if c.config.Debug {
+			log.Printf("Friend %s (%d) connection status changed to: %s", friend.Name, friendID, statusStr)
+		}
+	}
+}
+
 // handleFileReceive processes incoming file transfer requests
 func (c *Client) handleFileReceive(friendID, fileNumber uint32, kind int, fileSize uint64, filename string) {
 	c.friendsMu.RLock()
