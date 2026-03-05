@@ -4,6 +4,7 @@ package client
 import (
 	"encoding/hex"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -274,22 +275,80 @@ func (c *Client) abortFileReceive(friendID, fileNumber uint32, transferKey strin
 	c.cancelFileTransfer(friendID, fileNumber)
 }
 
-// handleFileChunkRequest processes outgoing file chunk requests
-func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position uint64, length int) {
-	if c.config.Debug {
-		c.friendsMu.RLock()
-		friend, exists := c.friends[friendID]
-		c.friendsMu.RUnlock()
+func (c *Client) completeFileSend(friendID uint32, transferKey string, transfer *outgoingTransfer) {
+	transfer.File.Close()
 
-		if exists {
-			log.Printf("File chunk request from %s: file %d, position %d, length %d", friend.Name, fileNumber, position, length)
+	c.transfersMu.Lock()
+	delete(c.outgoingTransfers, transferKey)
+	c.transfersMu.Unlock()
+
+	log.Printf("File send completed: %s (%d bytes)", transfer.Filename, transfer.Sent)
+
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+
+	if exists {
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		completionMsg := fmt.Sprintf("SENT %s %d", transfer.Filename, transfer.Sent)
+		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
+			log.Printf("Failed to write file send completion notification: %v", err)
 		}
 	}
+}
 
-	// TODO: Implement file chunk reading and sending
-	// For now, send empty chunk to indicate transfer completion
-	// In a full implementation, this would read from the actual file
-	if err := c.tox.FileSendChunk(friendID, fileNumber, position, nil); err != nil {
+// handleFileChunkRequest processes outgoing file chunk requests
+func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position uint64, length int) {
+	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
+
+	c.transfersMu.RLock()
+	transfer, exists := c.outgoingTransfers[transferKey]
+	c.transfersMu.RUnlock()
+
+	if !exists {
+		log.Printf("No outgoing transfer found for key %s", transferKey)
+		return
+	}
+
+	// If length is 0, the transfer is being paused
+	if length == 0 {
+		if c.config.Debug {
+			log.Printf("File transfer paused for key %s", transferKey)
+		}
+		return
+	}
+
+	// Read chunk from file
+	chunk := make([]byte, length)
+	n, err := transfer.File.ReadAt(chunk, int64(position))
+	if err != nil && err != io.EOF {
+		log.Printf("Failed to read file chunk: %v", err)
+		c.cancelFileTransfer(friendID, fileNumber)
+		c.completeFileSend(friendID, transferKey, transfer)
+		return
+	}
+
+	// Send the chunk (or empty chunk if EOF)
+	var dataToSend []byte
+	if n > 0 {
+		dataToSend = chunk[:n]
+		transfer.Sent += uint64(n)
+	} else {
+		dataToSend = nil // Empty chunk signals EOF
+	}
+
+	if err := c.tox.FileSendChunk(friendID, fileNumber, position, dataToSend); err != nil {
 		log.Printf("Failed to send file chunk: %v", err)
+		c.cancelFileTransfer(friendID, fileNumber)
+		c.completeFileSend(friendID, transferKey, transfer)
+		return
+	}
+
+	// If we sent an empty chunk (EOF), complete the transfer
+	if dataToSend == nil {
+		c.completeFileSend(friendID, transferKey, transfer)
+	} else if c.config.Debug {
+		log.Printf("Sent file chunk: %d bytes at position %d (%d/%d total)",
+			n, position, transfer.Sent, transfer.FileSize)
 	}
 }

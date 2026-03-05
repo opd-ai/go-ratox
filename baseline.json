@@ -1,0 +1,2442 @@
+{
+  "metadata": {
+    "repository": "",
+    "generated_at": "0001-01-01T00:00:00Z",
+    "analysis_time": 0,
+    "files_processed": 0,
+    "tool_version": "",
+    "go_version": ""
+  },
+  "overview": {
+    "total_lines_of_code": 0,
+    "total_functions": 0,
+    "total_methods": 0,
+    "total_structs": 0,
+    "total_interfaces": 0,
+    "total_packages": 0,
+    "total_files": 0
+  },
+  "functions": [
+    {
+      "name": "main",
+      "package": "main",
+      "file": "main.go",
+      "line": 34,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 158,
+        "code": 128,
+        "comments": 9,
+        "blank": 21
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 14,
+        "cognitive": 14,
+        "nesting_depth": 2,
+        "overall": 19.2
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "printUsage",
+      "package": "main",
+      "file": "main.go",
+      "line": 195,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 24,
+        "code": 22,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "handleFriendRequest",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 15,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 11,
+        "code": 8,
+        "comments": 1,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 55,
+        "has_example": false,
+        "quality_score": 0.22000000000000003
+      }
+    },
+    {
+      "name": "handleFriendMessage",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 30,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 32,
+        "code": 23,
+        "comments": 3,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 1,
+        "overall": 7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 61,
+        "has_example": false,
+        "quality_score": 0.244
+      }
+    },
+    {
+      "name": "handleFriendNameChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 66,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 26,
+        "code": 21,
+        "comments": 3,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 3,
+        "overall": 10.6
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 53,
+        "has_example": false,
+        "quality_score": 0.21200000000000002
+      }
+    },
+    {
+      "name": "handleFriendStatusChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 96,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 28,
+        "code": 24,
+        "comments": 1,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 57,
+        "has_example": false,
+        "quality_score": 0.22799999999999998
+      }
+    },
+    {
+      "name": "handleFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 128,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 31,
+        "code": 22,
+        "comments": 3,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 4,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 2
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 1,
+        "overall": 8.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 60,
+        "has_example": false,
+        "quality_score": 0.24
+      }
+    },
+    {
+      "name": "rejectFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 162,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 4,
+        "code": 4,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "acceptFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 169,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 29,
+        "code": 26,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "cancelFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 201,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 3,
+        "code": 3,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "handleFileReceiveChunk",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 208,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 27,
+        "code": 22,
+        "comments": 0,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.236
+      }
+    },
+    {
+      "name": "completeFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 238,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 19,
+        "code": 15,
+        "comments": 0,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 2,
+        "overall": 4.9
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "writeFileChunk",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 260,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 6,
+        "code": 6,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.8
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "abortFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 269,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 5,
+        "code": 5,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "handleFileChunkRequest",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 278,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 16,
+        "code": 11,
+        "comments": 3,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 62,
+        "has_example": false,
+        "quality_score": 0.248
+      }
+    },
+    {
+      "name": "Load",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 82,
+      "is_exported": true,
+      "is_method": false,
+      "lines": {
+        "total": 101,
+        "code": 83,
+        "comments": 4,
+        "blank": 14
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 120,
+        "has_example": false,
+        "quality_score": 0.4
+      }
+    },
+    {
+      "name": "Save",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 187,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 42,
+        "code": 35,
+        "comments": 0,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 37,
+        "has_example": false,
+        "quality_score": 0.148
+      }
+    },
+    {
+      "name": "FriendDir",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 233,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.33599999999999997
+      }
+    },
+    {
+      "name": "GlobalFIFOPath",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 238,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 55,
+        "has_example": false,
+        "quality_score": 0.32000000000000006
+      }
+    },
+    {
+      "name": "FriendFIFOPath",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 243,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 64,
+        "has_example": false,
+        "quality_score": 0.356
+      }
+    },
+    {
+      "name": "New",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 68,
+      "is_exported": true,
+      "is_method": false,
+      "lines": {
+        "total": 37,
+        "code": 26,
+        "comments": 4,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 1,
+        "overall": 5.7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 38,
+        "has_example": false,
+        "quality_score": 0.15200000000000002
+      }
+    },
+    {
+      "name": "initTox",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 109,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 35,
+        "code": 26,
+        "comments": 2,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 8,
+        "nesting_depth": 2,
+        "overall": 11.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 37,
+        "has_example": false,
+        "quality_score": 0.148
+      }
+    },
+    {
+      "name": "setupCallbacks",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 148,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 34,
+        "code": 21,
+        "comments": 7,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 47,
+        "has_example": false,
+        "quality_score": 0.188
+      }
+    },
+    {
+      "name": "loadFriends",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 186,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 28,
+        "code": 22,
+        "comments": 1,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 54,
+        "has_example": false,
+        "quality_score": 0.21600000000000003
+      }
+    },
+    {
+      "name": "Run",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 216,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 56,
+        "code": 44,
+        "comments": 5,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 2,
+        "overall": 10.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "bootstrap",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 276,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 9,
+        "code": 8,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 42,
+        "has_example": false,
+        "quality_score": 0.168
+      }
+    },
+    {
+      "name": "autoSave",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 289,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 13,
+        "code": 11,
+        "comments": 1,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 46,
+        "has_example": false,
+        "quality_score": 0.18400000000000002
+      }
+    },
+    {
+      "name": "updateConnectionStatus",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 306,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 15,
+        "code": 14,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 4,
+        "overall": 11.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 71,
+        "has_example": false,
+        "quality_score": 0.284
+      }
+    },
+    {
+      "name": "saveToxData",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 325,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 6,
+        "code": 6,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 2,
+        "overall": 4.9
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 36,
+        "has_example": false,
+        "quality_score": 0.144
+      }
+    },
+    {
+      "name": "Shutdown",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 335,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 31,
+        "code": 18,
+        "comments": 5,
+        "blank": 8
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 1,
+        "overall": 7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 42,
+        "has_example": false,
+        "quality_score": 0.168
+      }
+    },
+    {
+      "name": "GetToxID",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 370,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 53,
+        "has_example": false,
+        "quality_score": 0.31200000000000006
+      }
+    },
+    {
+      "name": "GetFriend",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 375,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 4,
+        "code": 4,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 43,
+        "has_example": false,
+        "quality_score": 0.272
+      }
+    },
+    {
+      "name": "SendMessage",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 383,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 11,
+        "code": 8,
+        "comments": 1,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.8
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 45,
+        "has_example": false,
+        "quality_score": 0.18000000000000002
+      }
+    },
+    {
+      "name": "AddFriend",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 398,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 27,
+        "code": 20,
+        "comments": 2,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 34,
+        "has_example": false,
+        "quality_score": 0.136
+      }
+    },
+    {
+      "name": "AcceptFriendRequest",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 427,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 33,
+        "code": 24,
+        "comments": 3,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 1,
+        "overall": 5.7
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "UpdateSelfName",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 464,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 6,
+        "code": 5,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 49,
+        "has_example": false,
+        "quality_score": 0.196
+      }
+    },
+    {
+      "name": "UpdateSelfStatusMessage",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 474,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 6,
+        "code": 5,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 60,
+        "has_example": false,
+        "quality_score": 0.24
+      }
+    },
+    {
+      "name": "NewFIFOManager",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 71,
+      "is_exported": true,
+      "is_method": false,
+      "lines": {
+        "total": 9,
+        "code": 8,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 42,
+        "has_example": false,
+        "quality_score": 0.168
+      }
+    },
+    {
+      "name": "Run",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 84,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 23,
+        "code": 16,
+        "comments": 3,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 28,
+        "has_example": false,
+        "quality_score": 0.11200000000000002
+      }
+    },
+    {
+      "name": "createGlobalFIFOs",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 111,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 35,
+        "code": 27,
+        "comments": 3,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 48,
+        "has_example": false,
+        "quality_score": 0.192
+      }
+    },
+    {
+      "name": "CreateFriendFIFOs",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 150,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 32,
+        "code": 27,
+        "comments": 1,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.236
+      }
+    },
+    {
+      "name": "createFIFO",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 186,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 50,
+        "code": 36,
+        "comments": 7,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.3
+      },
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 9,
+        "nesting_depth": 2,
+        "overall": 12.7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 63,
+        "has_example": false,
+        "quality_score": 0.252
+      }
+    },
+    {
+      "name": "createIDFile",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 240,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 12,
+        "code": 9,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 69,
+        "has_example": false,
+        "quality_score": 0.27599999999999997
+      }
+    },
+    {
+      "name": "createConnectionStatusFile",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 256,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 39,
+        "code": 31,
+        "comments": 1,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 83,
+        "has_example": false,
+        "quality_score": 0.332
+      }
+    },
+    {
+      "name": "monitorGlobalFIFOs",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 299,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 26,
+        "code": 17,
+        "comments": 5,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 56,
+        "has_example": false,
+        "quality_score": 0.22400000000000003
+      }
+    },
+    {
+      "name": "monitorSingleFIFO",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 329,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 16,
+        "code": 13,
+        "comments": 2,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 3,
+        "overall": 10.6
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 83,
+        "has_example": false,
+        "quality_score": 0.332
+      }
+    },
+    {
+      "name": "readFIFOBlocking",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 349,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 30,
+        "code": 24,
+        "comments": 3,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.8
+      },
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 9,
+        "nesting_depth": 3,
+        "overall": 13.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 53,
+        "has_example": false,
+        "quality_score": 0.21200000000000002
+      }
+    },
+    {
+      "name": "monitorFriendFIFOs",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 383,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 21,
+        "code": 14,
+        "comments": 4,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 61,
+        "has_example": false,
+        "quality_score": 0.244
+      }
+    },
+    {
+      "name": "readFIFO",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 408,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 37,
+        "code": 30,
+        "comments": 2,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.8
+      },
+      "complexity": {
+        "cyclomatic": 12,
+        "cognitive": 12,
+        "nesting_depth": 3,
+        "overall": 17.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 63,
+        "has_example": false,
+        "quality_score": 0.252
+      }
+    },
+    {
+      "name": "writeFIFO",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 449,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 26,
+        "code": 19,
+        "comments": 2,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 1,
+        "overall": 7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 32,
+        "has_example": false,
+        "quality_score": 0.128
+      }
+    },
+    {
+      "name": "handleRequestIn",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 481,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 29,
+        "code": 20,
+        "comments": 5,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 52,
+        "has_example": false,
+        "quality_score": 0.20800000000000002
+      }
+    },
+    {
+      "name": "handleNameChange",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 514,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 9,
+        "code": 8,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 48,
+        "has_example": false,
+        "quality_score": 0.192
+      }
+    },
+    {
+      "name": "handleStatusMessageChange",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 527,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 5,
+        "code": 4,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.236
+      }
+    },
+    {
+      "name": "handleFriendTextIn",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 536,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 50,
+        "code": 38,
+        "comments": 5,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 9,
+        "nesting_depth": 2,
+        "overall": 12.7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 52,
+        "has_example": false,
+        "quality_score": 0.20800000000000002
+      }
+    },
+    {
+      "name": "handleFriendFileIn",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 590,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 73,
+        "code": 54,
+        "comments": 6,
+        "blank": 13
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 11,
+        "cognitive": 11,
+        "nesting_depth": 2,
+        "overall": 15.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 53,
+        "has_example": false,
+        "quality_score": 0.21200000000000002
+      }
+    },
+    {
+      "name": "WriteRequestOut",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 669,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 3,
+        "code": 3,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 64,
+        "has_example": false,
+        "quality_score": 0.256
+      }
+    },
+    {
+      "name": "WriteFriendTextOut",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 676,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 2,
+        "code": 2,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 64,
+        "has_example": false,
+        "quality_score": 0.256
+      }
+    },
+    {
+      "name": "WriteFriendStatus",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 682,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 2,
+        "code": 2,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 58,
+        "has_example": false,
+        "quality_score": 0.23199999999999998
+      }
+    },
+    {
+      "name": "WriteFriendFileOut",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 688,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 2,
+        "code": 2,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 73,
+        "has_example": false,
+        "quality_score": 0.292
+      }
+    },
+    {
+      "name": "periodicCleanup",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 694,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 12,
+        "code": 10,
+        "comments": 1,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 52,
+        "has_example": false,
+        "quality_score": 0.20800000000000002
+      }
+    },
+    {
+      "name": "cleanupUnusedFIFOs",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 710,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*FIFOManager",
+      "lines": {
+        "total": 13,
+        "code": 11,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 3,
+        "overall": 6.7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 65,
+        "has_example": false,
+        "quality_score": 0.26
+      }
+    },
+    {
+      "name": "isGlobalFIFO",
+      "package": "client",
+      "file": "client/fifo.go",
+      "line": 727,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 2,
+        "code": 2,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 55,
+        "has_example": false,
+        "quality_score": 0.32000000000000006
+      }
+    }
+  ],
+  "structs": null,
+  "interfaces": null,
+  "packages": null,
+  "circular_dependencies": null,
+  "patterns": {
+    "design_patterns": {
+      "singleton": null,
+      "factory": null,
+      "builder": null,
+      "observer": null,
+      "strategy": null
+    },
+    "concurrency_patterns": {
+      "worker_pools": null,
+      "pipelines": null,
+      "fan_out": null,
+      "fan_in": null,
+      "semaphores": null,
+      "goroutines": {
+        "total_count": 0,
+        "anonymous_count": 0,
+        "named_count": 0,
+        "potential_leaks": null,
+        "instances": null
+      },
+      "channels": {
+        "total_count": 0,
+        "buffered_count": 0,
+        "unbuffered_count": 0,
+        "directional_count": 0,
+        "instances": null
+      },
+      "sync_primitives": {
+        "mutexes": null,
+        "rw_mutexes": null,
+        "wait_groups": null,
+        "once": null,
+        "cond": null,
+        "atomic": null
+      }
+    },
+    "anti_patterns": {
+      "god_objects": null,
+      "long_methods": null,
+      "deep_nesting": null,
+      "magic_numbers": null
+    }
+  },
+  "complexity": {
+    "average_function_complexity": 0,
+    "average_struct_complexity": 0,
+    "highest_complexity": null,
+    "complexity_distribution": null
+  },
+  "documentation": {
+    "coverage": {
+      "packages": 100,
+      "functions": 100,
+      "types": 100,
+      "methods": 84.21052631578947,
+      "overall": 89.28571428571429
+    },
+    "quality": {
+      "average_length": 39.486607142857146,
+      "code_examples": 0,
+      "inline_comments": 228,
+      "block_comments": 0,
+      "quality_score": 45.714285714285715
+    },
+    "todo_comments": [
+      {
+        "file": "/home/user/go/src/github.com/opd-ai/go-ratox/client/handlers.go",
+        "line": 289,
+        "description": "Implement file chunk reading and sending"
+      }
+    ],
+    "fixme_comments": [],
+    "hack_comments": [],
+    "bug_comments": [
+      {
+        "file": "/home/user/go/src/github.com/opd-ai/go-ratox/main.go",
+        "line": 130,
+        "description": "logging if requested",
+        "severity": "critical"
+      },
+      {
+        "file": "/home/user/go/src/github.com/opd-ai/go-ratox/config/config.go",
+        "line": 27,
+        "description": "enables debug logging",
+        "severity": "critical"
+      }
+    ],
+    "xxx_comments": [],
+    "deprecated_comments": [],
+    "note_comments": [],
+    "stale_annotations": 0,
+    "annotations_by_category": {
+      "BUG": 2,
+      "TODO": 1
+    }
+  },
+  "generics": {
+    "type_parameters": {
+      "count": 0,
+      "constraints": null,
+      "complexity": null
+    },
+    "instantiations": {
+      "functions": null,
+      "types": null,
+      "methods": null
+    },
+    "constraint_usage": null,
+    "complexity_score": 0
+  },
+  "duplication": {
+    "clone_pairs": 1,
+    "duplicated_lines": 6,
+    "duplication_ratio": 0.0030441400304414,
+    "largest_clone_size": 6,
+    "clones": [
+      {
+        "hash": "fffcc760ad7f23df",
+        "type": "renamed",
+        "instances": [
+          {
+            "file": "main.go",
+            "start_line": 206,
+            "end_line": 211,
+            "node_count": 36
+          },
+          {
+            "file": "main.go",
+            "start_line": 212,
+            "end_line": 217,
+            "node_count": 36
+          }
+        ],
+        "line_count": 6
+      }
+    ]
+  },
+  "naming": {
+    "file_name_violations": 0,
+    "identifier_violations": 0,
+    "package_name_violations": 0,
+    "overall_naming_score": 0,
+    "file_name_issues": null,
+    "identifier_issues": null,
+    "package_name_issues": null
+  },
+  "placement": {
+    "misplaced_functions": 0,
+    "misplaced_methods": 0,
+    "low_cohesion_files": 0,
+    "avg_file_cohesion": 0,
+    "function_issues": null,
+    "method_issues": null,
+    "cohesion_issues": null
+  },
+  "organization": {
+    "oversized_files": null,
+    "oversized_packages": null,
+    "deep_directories": null,
+    "high_fan_in_packages": null,
+    "high_fan_out_packages": null,
+    "avg_package_instability": 0
+  },
+  "burden": {
+    "magic_numbers": null,
+    "dead_code": {
+      "unreferenced_functions": null,
+      "unreachable_code": null,
+      "total_dead_lines": 0,
+      "dead_code_percent": 0
+    },
+    "complex_signatures": null,
+    "deeply_nested_functions": null,
+    "feature_envy_methods": null
+  },
+  "scores": {
+    "file_scores": null,
+    "package_scores": null
+  },
+  "test_coverage": {
+    "function_coverage_rate": 0,
+    "complexity_coverage_rate": 0,
+    "high_risk_functions": null,
+    "coverage_gaps": null
+  },
+  "test_quality": {
+    "total_tests": 0,
+    "avg_assertions_per_test": 0,
+    "test_files": null
+  }
+}

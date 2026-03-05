@@ -652,13 +652,32 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	h := sha256.Sum256([]byte(filePath))
 	fileID := h
 
+	// Open file for reading
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Printf("Failed to open file: %v", err)
+		return
+	}
+
 	// Start file transfer
 	filename := filepath.Base(filePath)
 	transferID, err := fm.client.tox.FileSend(friendNum, 0, fileSize, fileID, filename)
 	if err != nil {
 		log.Printf("Failed to initiate file transfer: %v", err)
+		file.Close()
 		return
 	}
+
+	// Track outgoing transfer
+	transferKey := fmt.Sprintf("%d:%d", friendNum, transferID)
+	fm.client.transfersMu.Lock()
+	fm.client.outgoingTransfers[transferKey] = &outgoingTransfer{
+		File:     file,
+		Filename: filename,
+		FileSize: fileSize,
+		Sent:     0,
+	}
+	fm.client.transfersMu.Unlock()
 
 	log.Printf("File transfer initiated: %s (%d bytes) to friend %d, transfer ID: %d", filename, fileSize, friendNum, transferID)
 }

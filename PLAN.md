@@ -176,23 +176,19 @@ Implementation:
 - ✅ Handle transfer completion (empty chunk) by closing file and notifying via `file_out` FIFO
 - ✅ Refactored into helper functions to maintain low complexity
 
-#### Step 1.2: Complete File Send Chunk Handling
+#### Step 1.2: Complete File Send Chunk Handling ✅
+
+**Status:** COMPLETE
 
 **Goal:** Read file data from disk and send chunks when requested.
 
-1. Add an `outgoingTransfers` map to `Client` tracking active outgoing transfers:
-   ```go
-   type outgoingTransfer struct {
-       File     *os.File
-       Filename string
-       FileSize uint64
-       Sent     uint64
-   }
-   outgoingTransfers map[string]*outgoingTransfer // key: "friendID:fileNumber"
-   ```
-2. In `handleFriendFileIn` (after `FileSend` succeeds), register the outgoing transfer.
-3. In `handleFileChunkRequest`, read `length` bytes from the file at `position` and call `FileSendChunk`.
-4. When `length` is 0, the transfer is complete — close the file and clean up.
+Implementation:
+- ✅ Added file opening and tracking in `handleFriendFileIn` after `FileSend` succeeds
+- ✅ Registered outgoing transfer with file handle in `outgoingTransfers` map
+- ✅ Implemented `handleFileChunkRequest` to read chunks from file at specified position
+- ✅ Send chunks via `FileSendChunk` with proper error handling
+- ✅ Added `completeFileSend` to clean up file handle and notify via FIFO
+- ✅ Handle EOF properly by sending nil chunk to signal completion
 
 #### Step 1.3: Implement File Transfer Rejection ✅
 
