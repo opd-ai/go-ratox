@@ -56,12 +56,13 @@ type outgoingTransfer struct {
 
 // Friend represents a Tox friend with associated metadata
 type Friend struct {
-	ID        uint32
-	PublicKey [32]byte
-	Name      string
-	Status    int // User status (0=none, 1=away, 2=busy)
-	Online    bool
-	LastSeen  time.Time
+	ID            uint32
+	PublicKey     [32]byte
+	Name          string
+	Status        int // User status (0=none, 1=away, 2=busy)
+	StatusMessage string
+	Online        bool
+	LastSeen      time.Time
 }
 
 // New creates a new Tox client instance
@@ -164,6 +165,11 @@ func (c *Client) setupCallbacks() {
 	// Friend status callback
 	c.tox.OnFriendStatus(func(friendID uint32, status toxcore.FriendStatus) {
 		c.handleFriendStatusChange(friendID, int(status))
+	})
+
+	// Friend status message callback
+	c.tox.OnFriendStatusMessage(func(friendID uint32, statusMessage string) {
+		c.handleFriendStatusMessageChange(friendID, statusMessage)
 	})
 
 	// Friend connection status callback

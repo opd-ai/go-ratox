@@ -230,17 +230,19 @@ Implementation:
 - ✅ Handler logs status changes in debug mode
 - ✅ Connection status file is now updated event-driven instead of polling-only
 
-#### Step 2.3: Register `OnFriendStatusMessage` Callback
+#### Step 2.3: Register `OnFriendStatusMessage` Callback ✅
+
+**Status:** COMPLETE
 
 **Goal:** Track when friends change their status message.
 
-1. In `setupCallbacks`, add:
-   ```go
-   c.tox.OnFriendStatusMessage(func(friendID uint32, statusMessage string) {
-       c.handleFriendStatusMessageChange(friendID, statusMessage)
-   })
-   ```
-2. Write the updated status message to a `status_message` file in the friend's directory.
+Implementation:
+- ✅ Added `StatusMessage` field to `Friend` struct in `client.go`
+- ✅ Added `FriendStatusMessage` FIFO constant for friend-specific status messages
+- ✅ Implemented `handleFriendStatusMessageChange` handler in `handlers.go`
+- ✅ Registered `OnFriendStatusMessage` callback in `setupCallbacks`
+- ✅ Created `WriteFriendStatusMessage` method to write to friend's status_message FIFO
+- ✅ Added friend status_message FIFO to `CreateFriendFIFOs` list
 
 ### Phase 3: Use Improved toxcore APIs
 

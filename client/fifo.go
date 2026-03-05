@@ -55,11 +55,12 @@ const (
 	ConnectionStatus = "connection_status" // Read-only - connection status info
 
 	// Friend-specific FIFOs
-	TextIn  = "text_in"  // Write-only - send messages
-	TextOut = "text_out" // Read-only - receive messages
-	FileIn  = "file_in"  // Write-only - send files
-	FileOut = "file_out" // Read-only - receive files
-	Status  = "status"   // Read-only - friend status
+	TextIn              = "text_in"        // Write-only - send messages
+	TextOut             = "text_out"       // Read-only - receive messages
+	FileIn              = "file_in"        // Write-only - send files
+	FileOut             = "file_out"       // Read-only - receive files
+	Status              = "status"         // Read-only - friend status
+	FriendStatusMessage = "status_message" // Read-only - friend status message
 
 	// FIFO permissions
 	FIFOPermInput  = 0o600 // Read/write for owner
@@ -163,6 +164,7 @@ func (fm *FIFOManager) CreateFriendFIFOs(friendID string) error {
 		{FileIn, true, false},
 		{FileOut, false, true},
 		{Status, false, true},
+		{FriendStatusMessage, false, true},
 	}
 
 	for _, fifo := range friendFIFOs {
@@ -701,6 +703,12 @@ func (fm *FIFOManager) WriteFriendTextOut(friendID, message string) error {
 func (fm *FIFOManager) WriteFriendStatus(friendID, status string) error {
 	path := fm.config.FriendFIFOPath(friendID, Status)
 	return fm.writeFIFO(path, status)
+}
+
+// WriteFriendStatusMessage writes status message to a friend's status_message FIFO
+func (fm *FIFOManager) WriteFriendStatusMessage(friendID, statusMessage string) error {
+	path := fm.config.FriendFIFOPath(friendID, FriendStatusMessage)
+	return fm.writeFIFO(path, statusMessage)
 }
 
 // WriteFriendFileOut writes file transfer info to a friend's file_out FIFO

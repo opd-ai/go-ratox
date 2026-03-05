@@ -159,6 +159,28 @@ func (c *Client) handleFriendConnectionStatusChange(friendID uint32, status toxc
 	}
 }
 
+// handleFriendStatusMessageChange processes friend status message changes
+func (c *Client) handleFriendStatusMessageChange(friendID uint32, statusMessage string) {
+	c.friendsMu.Lock()
+	friend, exists := c.friends[friendID]
+	if exists {
+		friend.StatusMessage = statusMessage
+	}
+	c.friendsMu.Unlock()
+
+	if exists {
+		// Write status message to friend's status_message FIFO
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		if err := c.fifoManager.WriteFriendStatusMessage(friendIDStr, statusMessage); err != nil {
+			log.Printf("Failed to write friend status message to FIFO: %v", err)
+		}
+
+		if c.config.Debug {
+			log.Printf("Friend %s (%d) status message changed to: %s", friend.Name, friendID, statusMessage)
+		}
+	}
+}
+
 // handleSelfConnectionStatusChange processes self connection status changes
 func (c *Client) handleSelfConnectionStatusChange(status toxcore.ConnectionStatus) {
 	// Update connection status file immediately
