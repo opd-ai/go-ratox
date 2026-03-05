@@ -91,7 +91,7 @@ func main() {
 		"operation":  "create_directory",
 	}).Debug("Creating configuration directory")
 
-	if err := os.MkdirAll(configDir, 0700); err != nil {
+	if err := os.MkdirAll(configDir, 0o700); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"caller":     "main",
 			"config_dir": configDir,

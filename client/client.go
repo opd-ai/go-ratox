@@ -30,9 +30,9 @@ type Client struct {
 	friendsMu sync.RWMutex
 
 	// File transfer tracking
-	incomingTransfers  map[string]*incomingTransfer
-	outgoingTransfers  map[string]*outgoingTransfer
-	transfersMu        sync.RWMutex
+	incomingTransfers map[string]*incomingTransfer
+	outgoingTransfers map[string]*outgoingTransfer
+	transfersMu       sync.RWMutex
 
 	// Shutdown channel
 	shutdown chan struct{}
@@ -167,17 +167,17 @@ func (c *Client) setupCallbacks() {
 	})
 
 	// File receive callback
-	c.tox.OnFileRecv(func(friendID uint32, fileID uint32, kind uint32, fileSize uint64, filename string) {
+	c.tox.OnFileRecv(func(friendID, fileID, kind uint32, fileSize uint64, filename string) {
 		c.handleFileReceive(friendID, fileID, int(kind), fileSize, filename)
 	})
 
 	// File receive chunk callback
-	c.tox.OnFileRecvChunk(func(friendID uint32, fileID uint32, position uint64, data []byte) {
+	c.tox.OnFileRecvChunk(func(friendID, fileID uint32, position uint64, data []byte) {
 		c.handleFileReceiveChunk(friendID, fileID, position, data)
 	})
 
 	// File chunk request callback
-	c.tox.OnFileChunkRequest(func(friendID uint32, fileID uint32, position uint64, length int) {
+	c.tox.OnFileChunkRequest(func(friendID, fileID uint32, position uint64, length int) {
 		c.handleFileChunkRequest(friendID, fileID, position, length)
 	})
 }
@@ -324,7 +324,7 @@ func (c *Client) updateConnectionStatus() {
 // saveToxData saves Tox state to disk
 func (c *Client) saveToxData() {
 	saveData := c.tox.GetSavedata()
-	if err := os.WriteFile(c.config.SaveFile, saveData, 0600); err != nil {
+	if err := os.WriteFile(c.config.SaveFile, saveData, 0o600); err != nil {
 		log.Printf("Error saving Tox data: %v", err)
 	} else if c.config.Debug {
 		log.Printf("Tox data saved to %s", c.config.SaveFile)

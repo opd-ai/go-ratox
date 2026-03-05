@@ -211,7 +211,7 @@ func (c *Config) Save() error {
 		"json_size": len(data),
 	}).Debug("Configuration marshaled to JSON successfully")
 
-	if err := os.WriteFile(configFile, data, 0600); err != nil {
+	if err := os.WriteFile(configFile, data, 0o600); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"caller":      caller,
 			"config_file": configFile,

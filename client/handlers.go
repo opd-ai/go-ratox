@@ -125,7 +125,7 @@ func (c *Client) handleFriendStatusChange(friendID uint32, status int) {
 }
 
 // handleFileReceive processes incoming file transfer requests
-func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int, fileSize uint64, filename string) {
+func (c *Client) handleFileReceive(friendID, fileNumber uint32, kind int, fileSize uint64, filename string) {
 	c.friendsMu.RLock()
 	friend, exists := c.friends[friendID]
 	c.friendsMu.RUnlock()
@@ -159,17 +159,17 @@ func (c *Client) handleFileReceive(friendID uint32, fileNumber uint32, kind int,
 	}
 }
 
-func (c *Client) rejectFileTransfer(friendID uint32, fileNumber uint32, fileSize uint64) {
+func (c *Client) rejectFileTransfer(friendID, fileNumber uint32, fileSize uint64) {
 	log.Printf("File too large (%d bytes), rejecting", fileSize)
 	if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel); err != nil {
 		log.Printf("Failed to reject file transfer: %v", err)
 	}
 }
 
-func (c *Client) acceptFileTransfer(friendID uint32, fileNumber uint32, friendIDStr, filename string, fileSize uint64) {
+func (c *Client) acceptFileTransfer(friendID, fileNumber uint32, friendIDStr, filename string, fileSize uint64) {
 	friendDir := c.config.FriendDir(friendIDStr)
 	destPath := fmt.Sprintf("%s/%s", friendDir, filename)
-	
+
 	file, err := os.Create(destPath)
 	if err != nil {
 		log.Printf("Failed to create destination file: %v", err)
@@ -198,16 +198,16 @@ func (c *Client) acceptFileTransfer(friendID uint32, fileNumber uint32, friendID
 	}
 }
 
-func (c *Client) cancelFileTransfer(friendID uint32, fileNumber uint32) {
+func (c *Client) cancelFileTransfer(friendID, fileNumber uint32) {
 	if err := c.tox.FileControl(friendID, fileNumber, toxcore.FileControlCancel); err != nil {
 		log.Printf("Failed to cancel file transfer: %v", err)
 	}
 }
 
 // handleFileReceiveChunk processes incoming file data chunks
-func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, position uint64, data []byte) {
+func (c *Client) handleFileReceiveChunk(friendID, fileNumber uint32, position uint64, data []byte) {
 	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
-	
+
 	c.transfersMu.Lock()
 	transfer, exists := c.incomingTransfers[transferKey]
 	c.transfersMu.Unlock()
@@ -230,24 +230,24 @@ func (c *Client) handleFileReceiveChunk(friendID uint32, fileNumber uint32, posi
 	}
 
 	if c.config.Debug {
-		log.Printf("Received file chunk: %d bytes at position %d (%d/%d total)", 
+		log.Printf("Received file chunk: %d bytes at position %d (%d/%d total)",
 			len(data), position, transfer.Received, transfer.FileSize)
 	}
 }
 
 func (c *Client) completeFileReceive(friendID uint32, transferKey string, transfer *incomingTransfer) {
 	transfer.File.Close()
-	
+
 	c.transfersMu.Lock()
 	delete(c.incomingTransfers, transferKey)
 	c.transfersMu.Unlock()
 
 	log.Printf("File transfer completed: %s (%d bytes)", transfer.Filename, transfer.Received)
-	
+
 	c.friendsMu.RLock()
 	friend, exists := c.friends[friendID]
 	c.friendsMu.RUnlock()
-	
+
 	if exists {
 		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
 		completionMsg := fmt.Sprintf("COMPLETE %s %d", transfer.Filename, transfer.Received)
@@ -266,7 +266,7 @@ func (c *Client) writeFileChunk(transfer *incomingTransfer, position uint64, dat
 	return nil
 }
 
-func (c *Client) abortFileReceive(friendID uint32, fileNumber uint32, transferKey string, transfer *incomingTransfer) {
+func (c *Client) abortFileReceive(friendID, fileNumber uint32, transferKey string, transfer *incomingTransfer) {
 	transfer.File.Close()
 	c.transfersMu.Lock()
 	delete(c.incomingTransfers, transferKey)
@@ -275,7 +275,7 @@ func (c *Client) abortFileReceive(friendID uint32, fileNumber uint32, transferKe
 }
 
 // handleFileChunkRequest processes outgoing file chunk requests
-func (c *Client) handleFileChunkRequest(friendID uint32, fileNumber uint32, position uint64, length int) {
+func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position uint64, length int) {
 	if c.config.Debug {
 		c.friendsMu.RLock()
 		friend, exists := c.friends[friendID]

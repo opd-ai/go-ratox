@@ -62,9 +62,9 @@ const (
 	Status  = "status"   // Read-only - friend status
 
 	// FIFO permissions
-	FIFOPermInput  = 0600 // Read/write for owner
-	FIFOPermOutput = 0600 // Read/write for owner
-	DirPerm        = 0700 // rwx------
+	FIFOPermInput  = 0o600 // Read/write for owner
+	FIFOPermOutput = 0o600 // Read/write for owner
+	DirPerm        = 0o700 // rwx------
 )
 
 // NewFIFOManager creates a new FIFO manager
@@ -202,7 +202,7 @@ func (fm *FIFOManager) createFIFO(path string, isInput, isOutput bool) error {
 	}
 
 	// Create the FIFO
-	var perm os.FileMode = 0600 // Default permission
+	var perm os.FileMode = 0o600 // Default permission
 	if isInput {
 		perm = FIFOPermInput
 	} else if isOutput {
@@ -241,7 +241,7 @@ func (fm *FIFOManager) createIDFile() error {
 	idPath := fm.config.GlobalFIFOPath(ID)
 	toxID := fm.client.GetToxID()
 
-	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0644); err != nil {
+	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0o644); err != nil {
 		return fmt.Errorf("failed to write ID file: %w", err)
 	}
 
@@ -284,7 +284,7 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 
 	statusInfo := fmt.Sprintf("connection: %s\nfriends: %d total, %d online\n", statusStr, friendsCount, onlineFriends)
 
-	if err := os.WriteFile(statusPath, []byte(statusInfo), 0644); err != nil {
+	if err := os.WriteFile(statusPath, []byte(statusInfo), 0o644); err != nil {
 		return fmt.Errorf("failed to write connection status file: %w", err)
 	}
 
