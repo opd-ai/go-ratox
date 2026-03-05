@@ -1,8 +1,8 @@
 module github.com/opd-ai/go-ratox
 
-go 1.21
+go 1.24.0
 
-toolchain go1.21.13
+toolchain go1.24.13
 
 require (
 	github.com/opd-ai/toxcore v0.0.0-20260305025602-521bbdf2a2a3
