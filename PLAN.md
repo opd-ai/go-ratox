@@ -248,7 +248,9 @@ Implementation:
 
 These steps adopt better APIs available in the updated toxcore.
 
-#### Step 3.1: Use `NewFromSavedata` for State Restoration
+#### Step 3.1: Use `NewFromSavedata` for State Restoration ✅
+
+**Status:** COMPLETE
 
 **Goal:** Properly restore full Tox state from save data.
 

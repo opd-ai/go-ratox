@@ -111,37 +111,39 @@ func (c *Client) initTox() error {
 	options := toxcore.NewOptions()
 	options.UDPEnabled = true
 
-	// Load existing save data if available
-	if saveData, err := os.ReadFile(c.config.SaveFile); err == nil {
-		options.SavedataType = toxcore.SaveDataTypeToxSave
-		options.SavedataData = saveData
-		options.SavedataLength = uint32(len(saveData))
+	var tox *toxcore.Tox
+	var err error
 
+	// Load existing save data if available
+	saveData, readErr := os.ReadFile(c.config.SaveFile)
+	if readErr == nil {
 		if c.config.Debug {
 			log.Printf("Loading existing save data from %s", c.config.SaveFile)
 		}
-	}
+		tox, err = toxcore.NewFromSavedata(options, saveData)
+		if err != nil {
+			return fmt.Errorf("failed to restore Tox from savedata: %w", err)
+		}
+	} else {
+		tox, err = toxcore.New(options)
+		if err != nil {
+			return fmt.Errorf("failed to create Tox instance: %w", err)
+		}
+		// Set self info only for new instances
+		if err := tox.SelfSetName(c.config.Name); err != nil {
+			if c.config.Debug {
+				log.Printf("Warning: failed to set name: %v", err)
+			}
+		}
 
-	tox, err := toxcore.New(options)
-	if err != nil {
-		return fmt.Errorf("failed to create Tox instance: %w", err)
+		if err := tox.SelfSetStatusMessage(c.config.StatusMessage); err != nil {
+			if c.config.Debug {
+				log.Printf("Warning: failed to set status message: %v", err)
+			}
+		}
 	}
 
 	c.tox = tox
-
-	// Set self info
-	if err := c.tox.SelfSetName(c.config.Name); err != nil {
-		if c.config.Debug {
-			log.Printf("Warning: failed to set name: %v", err)
-		}
-	}
-
-	if err := c.tox.SelfSetStatusMessage(c.config.StatusMessage); err != nil {
-		if c.config.Debug {
-			log.Printf("Warning: failed to set status message: %v", err)
-		}
-	}
-
 	return nil
 }
 
