@@ -231,7 +231,7 @@ func (tc *testClient) setupTestCallbacks() {
 		}
 	})
 
-	tc.tox.OnFileRecv(func(friendID, fileNumber uint32, kind uint32, fileSize uint64, filename string) {
+	tc.tox.OnFileRecv(func(friendID, fileNumber, kind uint32, fileSize uint64, filename string) {
 		select {
 		case tc.files <- testFile{friendID, fileNumber, filename, fileSize}:
 		case <-tc.ctx.Done():
@@ -418,7 +418,7 @@ func testFileTransfer(t *testing.T, client1, client2 *testClient, tmpDir1, tmpDi
 	if len(friends1) == 0 {
 		t.Fatal("No friends found for file transfer")
 	}
-	
+
 	var friendID1 uint32
 	for id := range friends1 {
 		friendID1 = id
@@ -428,7 +428,7 @@ func testFileTransfer(t *testing.T, client1, client2 *testClient, tmpDir1, tmpDi
 	// Create a test file
 	testData := []byte("This is a test file for ratox-go integration testing!")
 	testFilePath := filepath.Join(tmpDir1, "test_file.txt")
-	if err := os.WriteFile(testFilePath, testData, 0644); err != nil {
+	if err := os.WriteFile(testFilePath, testData, 0o644); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -563,7 +563,7 @@ func TestIntegrationSaveAndRestore(t *testing.T) {
 		t.Fatal("Savedata is empty")
 	}
 
-	if err := os.WriteFile(cfg.SaveFile, saveData, 0600); err != nil {
+	if err := os.WriteFile(cfg.SaveFile, saveData, 0o600); err != nil {
 		t.Fatalf("Failed to write save file: %v", err)
 	}
 
