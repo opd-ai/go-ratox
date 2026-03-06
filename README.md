@@ -9,13 +9,16 @@ Ratox is a FIFO (named pipe) based Tox client that provides a filesystem interfa
 - **FIFO-based filesystem interface** matching original ratox behavior  
 - **Text messaging** with UTF-8 support
 - **File transfers** up to 100MB (configurable)
-- **Friend management** with request handling
+- **Friend management** with request handling and friend deletion
+- **Typing indicators** for real-time conversation awareness
 - **Online/offline status management**
 - **Concurrent handling** of multiple friends
 - **Thread-safe operations** for all Tox interactions
 - **Graceful error handling** and network interruption recovery
 - **JSON configuration** with persistent settings
 - **Automatic bootstrap** to Tox DHT nodes
+- **Tor and I2P support** for anonymous networking
+- **Async (offline) messaging** with message queuing
 - **Conference/group chat support** (experimental, send-only)
 
 ## Installation
@@ -72,7 +75,9 @@ After starting, ratox-go creates a filesystem interface at `~/.config/ratox-go/`
 │   ├── text_out        # Read received messages
 │   ├── file_in         # Write file paths to send
 │   ├── file_out        # Read incoming file info
-│   └── status          # Read friend's status
+│   ├── status          # Read friend's status
+│   ├── typing          # Read friend's typing status
+│   └── remove_in       # Write to remove friend
 └── conferences/        # Conference directories (experimental)
     └── <id>/           # Per-conference FIFOs
         ├── text_in     # Send conference messages
@@ -98,7 +103,9 @@ The client creates a directory structure that mirrors the original ratox:
 │   ├── text_out            # Receive messages (read-only)
 │   ├── file_in             # Send files (write-only)
 │   ├── file_out            # Receive files (read-only)
-│   └── status              # Friend status (read-only)
+│   ├── status              # Friend status (read-only)
+│   ├── typing              # Friend typing status (read-only)
+│   └── remove_in           # Remove friend (write-only)
 └── conferences/<conference_id>/  # Directory for each conference
     ├── text_in             # Send conference messages (write-only)
     └── invite_in           # Invite friends to conference (write-only)
@@ -144,6 +151,22 @@ echo "/path/to/file.txt" > ~/.config/ratox-go/FRIEND_ID/file_in
 #### Monitor friend status
 ```bash
 cat ~/.config/ratox-go/FRIEND_ID/status
+```
+
+#### Monitor friend typing status
+```bash
+# Check if friend is typing (shows "true" or "false")
+cat ~/.config/ratox-go/FRIEND_ID/typing
+
+# Monitor typing status in real-time
+watch cat ~/.config/ratox-go/FRIEND_ID/typing
+```
+
+#### Remove a friend
+```bash
+# Remove a friend by writing "confirm" to their remove_in FIFO
+echo "confirm" > ~/.config/ratox-go/FRIEND_ID/remove_in
+# This will delete the friend from your contact list and clean up their directory
 ```
 
 ### Monitoring Multiple Friends
@@ -277,6 +300,71 @@ If connection fails with all nodes, check:
 1. Network connectivity (firewall rules, UDP blocked?)
 2. Node addresses are current (check Tox wiki)
 3. Public keys are correct (typos will cause connection failure)
+
+### Anonymous Networking (Tor/I2P)
+
+ratox-go supports routing Tox traffic through Tor or I2P for enhanced privacy and anonymity.
+
+#### Tor Configuration
+
+To route traffic through Tor, enable Tor transport in your `config.json`:
+
+```json
+{
+  "transport": {
+    "tor_enabled": true,
+    "tor_socks_addr": "127.0.0.1:9050"
+  }
+}
+```
+
+**Requirements:**
+- Tor daemon running locally (usually on port 9050)
+- Install Tor: `sudo apt install tor` (Debian/Ubuntu) or see [torproject.org](https://www.torproject.org/)
+
+**Benefits:**
+- Hides your IP address from peers and bootstrap nodes
+- Strong anonymity through Tor's onion routing
+- Bypass network restrictions and censorship
+
+#### I2P Configuration
+
+To route traffic through I2P, enable I2P transport in your `config.json`:
+
+```json
+{
+  "transport": {
+    "i2p_enabled": true,
+    "i2p_sam_addr": "127.0.0.1:7656"
+  }
+}
+```
+
+**Requirements:**
+- I2P router running with SAM bridge enabled (default port 7656)
+- Install I2P: see [geti2p.net](https://geti2p.net/)
+
+**Benefits:**
+- Alternative anonymizing network using garlic routing
+- Resistant to traffic analysis
+- Decentralized peer-to-peer architecture
+
+#### Using Both Tor and I2P
+
+You can enable both transports simultaneously for maximum connectivity:
+
+```json
+{
+  "transport": {
+    "tor_enabled": true,
+    "tor_socks_addr": "127.0.0.1:9050",
+    "i2p_enabled": true,
+    "i2p_sam_addr": "127.0.0.1:7656"
+  }
+}
+```
+
+The client will intelligently route traffic through the appropriate transport based on peer capabilities and network conditions.
 
 ### Command Line Options
 

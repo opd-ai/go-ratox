@@ -559,11 +559,24 @@ Implementation:
 
 ### Phase 6: Documentation & Polish
 
-#### Step 6.1: Update README.md
+#### Step 6.1: Update README.md ✅
 
-1. Document new features: friend deletion, typing indicators, conference support.
-2. Update filesystem interface diagram with new FIFOs.
-3. Update version to reflect new toxcore dependency.
+**Status:** COMPLETE
+
+**Goal:** Document new features added during implementation.
+
+1. ✅ Updated filesystem interface diagrams to include `typing` and `remove_in` FIFOs
+2. ✅ Added documentation for friend deletion operation
+3. ✅ Added documentation for typing indicator monitoring
+4. ✅ Updated Features section to mention:
+   - Friend deletion capability
+   - Typing indicators
+   - Tor and I2P support
+   - Async (offline) messaging
+5. ✅ Added comprehensive "Anonymous Networking (Tor/I2P)" configuration section
+6. ✅ Documented Tor configuration with requirements and benefits
+7. ✅ Documented I2P configuration with requirements and benefits
+8. ✅ Explained how to use both transports simultaneously
 
 #### Step 6.2: Update AUDIT.md
 
