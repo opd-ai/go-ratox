@@ -45,6 +45,9 @@ type Config struct {
 	// Transport configures network transport options
 	Transport TransportConfig `json:"transport"`
 
+	// BootstrapServer configures the optional built-in Tox DHT bootstrap server
+	BootstrapServer BootstrapServerConfig `json:"bootstrap_server"`
+
 	// SaveFile is the path to the Tox save file
 	SaveFile string `json:"-"`
 }
@@ -64,6 +67,36 @@ type BootstrapNode struct {
 	Address   string `json:"address"`
 	Port      uint16 `json:"port"`
 	PublicKey string `json:"public_key"`
+}
+
+// BootstrapServerConfig holds configuration for an optional built-in Tox DHT bootstrap server.
+// When Enabled is true, ratox-go will run a bootstrap server alongside the normal client,
+// accepting inbound DHT connections over clearnet (UDP), Tor onion services, and/or I2P.
+type BootstrapServerConfig struct {
+	// Enabled controls whether the bootstrap server is started.
+	Enabled bool `json:"enabled"`
+
+	// ClearnetEnabled controls whether the UDP clearnet bootstrap service is started.
+	// Default: true when the server is enabled.
+	ClearnetEnabled bool `json:"clearnet_enabled"`
+
+	// ClearnetPort is the UDP port to bind for clearnet DHT traffic.
+	// The Tox ecosystem conventionally uses 33445. 0 lets the OS choose.
+	ClearnetPort uint16 `json:"clearnet_port"`
+
+	// OnionEnabled controls whether a Tor hidden-service endpoint is started.
+	// Requires a running Tor daemon. Configuration is read from the
+	// TOR_CONTROL_ADDR environment variable (default: 127.0.0.1:9051).
+	OnionEnabled bool `json:"onion_enabled"`
+
+	// I2PEnabled controls whether an I2P destination endpoint is started.
+	// Requires a running I2P router with the SAM bridge enabled.
+	I2PEnabled bool `json:"i2p_enabled"`
+
+	// I2PSAMAddr is the address of the I2P SAM bridge.
+	// Overrides the I2P_SAM_ADDR environment variable when non-empty.
+	// Default: "127.0.0.1:7656".
+	I2PSAMAddr string `json:"i2p_sam_addr"`
 }
 
 // DefaultBootstrapNodes contains a list of default bootstrap nodes
@@ -128,6 +161,14 @@ func Load(configDir string) (*Config, error) {
 			TorSOCKSAddr: "127.0.0.1:9050",
 			I2PEnabled:   false,
 			I2PSAMAddr:   "127.0.0.1:7656",
+		},
+		BootstrapServer: BootstrapServerConfig{
+			Enabled:         false,
+			ClearnetEnabled: true,
+			ClearnetPort:    33445,
+			OnionEnabled:    false,
+			I2PEnabled:      false,
+			I2PSAMAddr:      "127.0.0.1:7656",
 		},
 		SaveFile: saveFile,
 	}
@@ -275,10 +316,16 @@ func (c *Config) ConferenceFIFOPath(conferenceID, fifoName string) string {
 	return filepath.Join(c.ConferenceDir(conferenceID), fifoName)
 }
 
-// ValidateTransport validates transport configuration
+// ValidateTransport validates transport configuration.
+// Tor and I2P may be enabled simultaneously: when both are active the
+// underlying MultiTransport routes packet (UDP/DHT) traffic through I2P
+// and TCP traffic through Tor, providing anonymous dual-overlay operation.
 func (c *Config) ValidateTransport() error {
-	if c.Transport.TorEnabled && c.Transport.I2PEnabled {
-		return fmt.Errorf("Tor and I2P cannot be enabled simultaneously")
+	// Minimal validation to ensure configuration is structurally sound.
+	// Additional transport-specific validation (e.g. Tor/I2P fields) can be
+	// added here as needed without changing the method's contract.
+	if strings.TrimSpace(c.ConfigDir) == "" {
+		return fmt.Errorf("config: ConfigDir must not be empty when validating transport settings")
 	}
 	return nil
 }

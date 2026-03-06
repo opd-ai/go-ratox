@@ -127,3 +127,149 @@ func TestFriendFIFOPath(t *testing.T) {
 		t.Errorf("Expected %s, got %s", expected, result)
 	}
 }
+
+func TestValidateTransport(t *testing.T) {
+	tests := []struct {
+		name        string
+		torEnabled  bool
+		i2pEnabled  bool
+		expectError bool
+	}{
+		{
+			name:        "neither Tor nor I2P enabled",
+			torEnabled:  false,
+			i2pEnabled:  false,
+			expectError: false,
+		},
+		{
+			name:        "Tor only enabled",
+			torEnabled:  true,
+			i2pEnabled:  false,
+			expectError: false,
+		},
+		{
+			name:        "I2P only enabled",
+			torEnabled:  false,
+			i2pEnabled:  true,
+			expectError: false,
+		},
+		{
+			name:        "Tor and I2P simultaneously enabled",
+			torEnabled:  true,
+			i2pEnabled:  true,
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &Config{
+				ConfigDir: "/valid/config/dir",
+				Transport: TransportConfig{
+					TorEnabled: tt.torEnabled,
+					I2PEnabled: tt.i2pEnabled,
+				},
+			}
+			err := cfg.ValidateTransport()
+			if tt.expectError && err == nil {
+				t.Error("Expected error but got nil")
+			}
+			if !tt.expectError && err != nil {
+				t.Errorf("Expected no error but got: %v", err)
+			}
+		})
+	}
+}
+
+func TestValidateTransportEmptyConfigDir(t *testing.T) {
+	cfg := &Config{
+		ConfigDir: "",
+		Transport: TransportConfig{},
+	}
+	if err := cfg.ValidateTransport(); err == nil {
+		t.Error("Expected error for empty ConfigDir but got nil")
+	}
+}
+
+func TestBootstrapServerConfigDefaults(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "ratox-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	cfg, err := Load(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+
+	if cfg.BootstrapServer.Enabled {
+		t.Error("Expected bootstrap server to be disabled by default")
+	}
+
+	if !cfg.BootstrapServer.ClearnetEnabled {
+		t.Error("Expected bootstrap server clearnet to be enabled by default")
+	}
+
+	if cfg.BootstrapServer.ClearnetPort != 33445 {
+		t.Errorf("Expected default clearnet port 33445, got %d", cfg.BootstrapServer.ClearnetPort)
+	}
+
+	if cfg.BootstrapServer.OnionEnabled {
+		t.Error("Expected bootstrap server onion to be disabled by default")
+	}
+
+	if cfg.BootstrapServer.I2PEnabled {
+		t.Error("Expected bootstrap server I2P to be disabled by default")
+	}
+
+	if cfg.BootstrapServer.I2PSAMAddr != "127.0.0.1:7656" {
+		t.Errorf("Expected default I2P SAM addr 127.0.0.1:7656, got %s", cfg.BootstrapServer.I2PSAMAddr)
+	}
+}
+
+func TestBootstrapServerConfigPersistence(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "ratox-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Start from a loaded config so that all defaults are populated,
+	// then modify only the BootstrapServer fields we care about.
+	cfg, err := Load(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to load initial config: %v", err)
+	}
+
+	cfg.Name = "Test User"
+	cfg.BootstrapServer.Enabled = true
+	cfg.BootstrapServer.ClearnetEnabled = true
+	cfg.BootstrapServer.ClearnetPort = 33445
+	cfg.BootstrapServer.OnionEnabled = true
+	cfg.BootstrapServer.I2PEnabled = true
+	cfg.BootstrapServer.I2PSAMAddr = "127.0.0.1:7656"
+
+	if err := cfg.Save(); err != nil {
+		t.Fatalf("Failed to save config: %v", err)
+	}
+
+	loaded, err := Load(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to load saved config: %v", err)
+	}
+
+	if !loaded.BootstrapServer.Enabled {
+		t.Error("Expected bootstrap server enabled to persist")
+	}
+	if !loaded.BootstrapServer.OnionEnabled {
+		t.Error("Expected bootstrap server onion enabled to persist")
+	}
+	if !loaded.BootstrapServer.I2PEnabled {
+		t.Error("Expected bootstrap server I2P enabled to persist")
+	}
+	// Verify default fields were not clobbered
+	if len(loaded.BootstrapNodes) == 0 {
+		t.Error("Expected bootstrap nodes to remain populated after persistence round-trip")
+	}
+}

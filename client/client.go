@@ -13,6 +13,7 @@ import (
 	"github.com/opd-ai/go-ratox/config"
 	"github.com/opd-ai/toxcore"
 	"github.com/opd-ai/toxcore/async"
+	"github.com/opd-ai/toxcore/bootstrap"
 )
 
 // Client represents the main Tox client with FIFO interface
@@ -25,6 +26,10 @@ type Client struct {
 	wg          sync.WaitGroup
 	running     bool
 	mu          sync.RWMutex
+	shutdownOnce sync.Once
+
+	// Bootstrap server (optional)
+	bootstrapServer *bootstrap.Server
 
 	// Friend management
 	friends   map[uint32]*Friend
@@ -105,6 +110,15 @@ func New(cfg *config.Config) (*Client, error) {
 	fifoManager := NewFIFOManager(client)
 	client.fifoManager = fifoManager
 
+	// Initialize bootstrap server if configured
+	if cfg.BootstrapServer.Enabled {
+		if err := client.initBootstrapServer(); err != nil {
+			client.tox.Kill()
+			cancel()
+			return nil, fmt.Errorf("failed to initialize bootstrap server: %w", err)
+		}
+	}
+
 	// Load existing friends
 	if err := client.loadFriends(); err != nil {
 		client.tox.Kill()
@@ -139,7 +153,11 @@ func (c *Client) configureTransportOptions() *toxcore.Options {
 	if c.config.Transport.TorEnabled || c.config.Transport.I2PEnabled {
 		options.UDPEnabled = false
 		if c.config.Debug {
-			log.Printf("Anonymizing overlay enabled, disabling UDP")
+			if c.config.Transport.TorEnabled && c.config.Transport.I2PEnabled {
+				log.Printf("Tor and I2P simultaneously enabled: disabling UDP (DHT packets will route through I2P)")
+			} else {
+				log.Printf("Anonymizing overlay enabled, disabling UDP")
+			}
 		}
 	} else {
 		options.UDPEnabled = true
@@ -306,6 +324,26 @@ func (c *Client) Run() error {
 		c.mu.Unlock()
 	}()
 
+	// Start bootstrap server if configured
+	if c.bootstrapServer != nil {
+		if err := c.bootstrapServer.Start(c.ctx); err != nil {
+			return fmt.Errorf("failed to start bootstrap server: %w", err)
+		}
+		if c.config.Debug {
+			bsCfg := c.config.BootstrapServer
+			if bsCfg.ClearnetEnabled {
+				log.Printf("Bootstrap server clearnet: %s", c.bootstrapServer.GetClearnetAddr())
+			}
+			if bsCfg.OnionEnabled {
+				log.Printf("Bootstrap server onion: %s", c.bootstrapServer.GetOnionAddr())
+			}
+			if bsCfg.I2PEnabled {
+				log.Printf("Bootstrap server i2p: %s", c.bootstrapServer.GetI2PAddr())
+			}
+			log.Printf("Bootstrap server public key: %s", c.bootstrapServer.GetPublicKeyHex())
+		}
+	}
+
 	// Start FIFO manager
 	c.wg.Add(1)
 	go func() {
@@ -353,6 +391,25 @@ func (c *Client) Run() error {
 			time.Sleep(c.tox.IterationInterval())
 		}
 	}
+}
+
+// initBootstrapServer initialises the bootstrap.Server from config.
+func (c *Client) initBootstrapServer() error {
+	bsCfg := &bootstrap.Config{
+		ClearnetEnabled:   c.config.BootstrapServer.ClearnetEnabled,
+		ClearnetPort:      c.config.BootstrapServer.ClearnetPort,
+		OnionEnabled:      c.config.BootstrapServer.OnionEnabled,
+		I2PEnabled:        c.config.BootstrapServer.I2PEnabled,
+		I2PSAMAddr:        c.config.BootstrapServer.I2PSAMAddr,
+		IterationInterval: 50 * time.Millisecond,
+	}
+
+	srv, err := bootstrap.New(bsCfg)
+	if err != nil {
+		return fmt.Errorf("bootstrap.New: %w", err)
+	}
+	c.bootstrapServer = srv
+	return nil
 }
 
 // bootstrap connects to DHT bootstrap nodes
@@ -472,39 +529,49 @@ func (c *Client) saveToxData() {
 	}
 }
 
-// Shutdown gracefully shuts down the client
+// Shutdown gracefully shuts down the client. It is safe to call multiple times.
 func (c *Client) Shutdown() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.shutdownOnce.Do(func() {
+		c.mu.Lock()
+		running := c.running
+		c.mu.Unlock()
 
-	if !c.running {
-		return
-	}
+		if !running {
+			return
+		}
 
-	if c.config.Debug {
-		log.Println("Shutting down client...")
-	}
+		if c.config.Debug {
+			log.Println("Shutting down client...")
+		}
 
-	// Signal shutdown
-	close(c.shutdown)
+		// Signal shutdown
+		close(c.shutdown)
 
-	// Cancel context to stop all goroutines
-	c.cancel()
+		// Cancel context to stop all goroutines
+		c.cancel()
 
-	// Wait for all goroutines to finish
-	c.wg.Wait()
+		// Wait for all goroutines to finish
+		c.wg.Wait()
 
-	// Save final state
-	c.saveToxData()
+		// Save final state
+		c.saveToxData()
 
-	// Cleanup Tox
-	if c.tox != nil {
-		c.tox.Kill()
-	}
+		// Cleanup Tox
+		if c.tox != nil {
+			c.tox.Kill()
+		}
 
-	if c.config.Debug {
-		log.Println("Client shutdown complete")
-	}
+		// Stop bootstrap server if running
+		if c.bootstrapServer != nil {
+			if err := c.bootstrapServer.Stop(); err != nil && c.config.Debug {
+				log.Printf("Warning: bootstrap server stop error: %v", err)
+			}
+		}
+
+		if c.config.Debug {
+			log.Println("Client shutdown complete")
+		}
+	})
 }
 
 // GetToxID returns the client's Tox ID as a hex string
