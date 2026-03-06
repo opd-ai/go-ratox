@@ -36,9 +36,9 @@ else
 fi
 
 # Check if config file was created
-if [ -f "$CLIENT_DIR/ratox.json" ]; then
+if [ -f "$CLIENT_DIR/config.json" ]; then
     echo "✓ Configuration file created"
-    cat "$CLIENT_DIR/ratox.json" | head -10
+    cat "$CLIENT_DIR/config.json" | head -10
 else
     echo "✗ Configuration file not found"
 fi
@@ -108,9 +108,9 @@ echo
 echo "7. Final configuration check..."
 
 # Check if configuration was saved properly
-if [ -f "$CLIENT_DIR/ratox.json" ]; then
+if [ -f "$CLIENT_DIR/config.json" ]; then
     echo "Final configuration:"
-    cat "$CLIENT_DIR/ratox.json"
+    cat "$CLIENT_DIR/config.json"
 fi
 
 echo
