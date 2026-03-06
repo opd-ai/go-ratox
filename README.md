@@ -8,7 +8,7 @@ Ratox is a FIFO (named pipe) based Tox client that provides a filesystem interfa
 
 - **FIFO-based filesystem interface** matching original ratox behavior  
 - **Text messaging** with UTF-8 support
-- **File transfers** up to 4GB
+- **File transfers** up to 100MB (configurable)
 - **Friend management** with request handling
 - **Online/offline status management**
 - **Concurrent handling** of multiple friends

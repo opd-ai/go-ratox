@@ -18,14 +18,14 @@ import (
 
 // Client represents the main Tox client with FIFO interface
 type Client struct {
-	tox         *toxcore.Tox
-	config      *config.Config
-	fifoManager *FIFOManager
-	ctx         context.Context
-	cancel      context.CancelFunc
-	wg          sync.WaitGroup
-	running     bool
-	mu          sync.RWMutex
+	tox          *toxcore.Tox
+	config       *config.Config
+	fifoManager  *FIFOManager
+	ctx          context.Context
+	cancel       context.CancelFunc
+	wg           sync.WaitGroup
+	running      bool
+	mu           sync.RWMutex
 	shutdownOnce sync.Once
 
 	// Bootstrap server (optional)
