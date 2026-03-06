@@ -801,12 +801,17 @@ func (fm *FIFOManager) validateFileForSending(filePath string) (os.FileInfo, uin
 	}
 
 	rawSize := fileInfo.Size()
+	if rawSize < 0 {
+		err := fmt.Errorf("invalid file size (negative): %d", rawSize)
+		log.Print(err)
+		return nil, 0, err
+	}
 	if fm.client.config.MaxFileSize > 0 && rawSize > fm.client.config.MaxFileSize {
 		err := fmt.Errorf("file too large (%d bytes), maximum allowed: %d", rawSize, fm.client.config.MaxFileSize)
 		log.Print(err)
 		return nil, 0, err
 	}
-	fileSize := uint64(rawSize) //nolint:gosec // rawSize is non-negative (checked above)
+	fileSize := uint64(rawSize)
 
 	return fileInfo, fileSize, nil
 }
