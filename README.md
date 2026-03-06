@@ -221,6 +221,63 @@ The client automatically creates a configuration file (`config.json`) with the f
 - `max_file_size`: Maximum file size to accept in bytes (default: 100MB)
 - `bootstrap_nodes`: List of DHT bootstrap nodes for network connection
 
+### Updating Bootstrap Nodes
+
+Bootstrap nodes are critical for connecting to the Tox DHT network. If the default nodes become unavailable, you can update them by editing `~/.config/ratox-go/client/config.json`.
+
+#### Finding Current Bootstrap Nodes
+
+The Tox community maintains updated lists of bootstrap nodes:
+
+- **Tox Wiki**: https://wiki.tox.chat/users/nodes
+- **nodes.tox.chat**: Tox's official node list service
+- **Community Lists**: Check the [Tox project](https://tox.chat/) for the latest recommendations
+
+#### Adding or Replacing Nodes
+
+Edit your `config.json` to add new nodes or replace stale ones:
+
+```json
+{
+  "bootstrap_nodes": [
+    {
+      "address": "nodes.tox.chat",
+      "port": 33445,
+      "public_key": "6FC41E2BD381D37E9748FC0E0328CE086AF9598BECC8FEB7DDF2E440475F300E"
+    },
+    {
+      "address": "NEW_NODE_ADDRESS",
+      "port": 33445,
+      "public_key": "NEW_NODE_PUBLIC_KEY"
+    }
+  ]
+}
+```
+
+**Important**: Each bootstrap node requires three fields:
+- `address`: Domain name or IP address
+- `port`: UDP port (usually 33445)
+- `public_key`: 64-character hex public key
+
+#### Verifying Connection
+
+After updating nodes, restart ratox-go with debug mode to verify connectivity:
+
+```bash
+./ratox-go -debug
+```
+
+Look for log messages indicating successful bootstrap:
+```
+Bootstrapping to nodes.tox.chat:33445
+DHT connection established
+```
+
+If connection fails with all nodes, check:
+1. Network connectivity (firewall rules, UDP blocked?)
+2. Node addresses are current (check Tox wiki)
+3. Public keys are correct (typos will cause connection failure)
+
 ### Command Line Options
 
 ```bash
@@ -372,8 +429,10 @@ golangci-lint run
 
 3. **Network Connection Issues**: 
    - Client automatically attempts reconnection
-   - Check bootstrap nodes in configuration
+   - Check bootstrap nodes in configuration (see [Updating Bootstrap Nodes](#updating-bootstrap-nodes))
+   - Verify UDP port 33445 is not blocked by firewall
    - Enable debug mode: `./ratox-go -debug`
+   - If default nodes are offline, update to current nodes from [Tox wiki](https://wiki.tox.chat/users/nodes)
 
 4. **Large Files Rejected**: 
    - Check `max_file_size` in configuration

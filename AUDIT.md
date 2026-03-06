@@ -55,7 +55,7 @@ The project is functionally sound with all major features implemented as documen
 
 ### LOW
 
-- [ ] **Default Bootstrap Nodes May Become Stale** — config/config.go:103-124 — Four hardcoded bootstrap nodes (nodes.tox.chat, 130.133.110.14, tox.zodiaclabs.org, tox2.abilinski.com) are embedded in code. If nodes go offline, new users cannot connect to DHT without manually editing config.json. Consider implementing fallback mechanism or documenting how to update nodes.
+- [x] **Default Bootstrap Nodes May Become Stale** — config/config.go:103-124 — Four hardcoded bootstrap nodes (nodes.tox.chat, 130.133.110.14, tox.zodiaclabs.org, tox2.abilinski.com) are embedded in code. If nodes go offline, new users cannot connect to DHT without manually editing config.json. **ADDRESSED**: Added comprehensive "Updating Bootstrap Nodes" section to README.md documenting: (1) where to find current node lists (Tox wiki, nodes.tox.chat), (2) how to add/replace nodes in config.json with all required fields, (3) verification steps with debug mode, (4) troubleshooting checklist for connection failures. Updated "Network Connection Issues" troubleshooting to reference bootstrap nodes section and provide immediate guidance.
 
 - [ ] **Test Script Has Wrong Config Filename** — test_ratox.sh:36-42 — Test script checks for `ratox.json` but actual config file is `config.json` (ConfigFileName constant in config/config.go:17). Script will report "✗ Configuration file not found" even on successful runs, creating confusion during testing.
 
