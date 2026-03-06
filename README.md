@@ -21,7 +21,7 @@ Ratox is a FIFO (named pipe) based Tox client that provides a filesystem interfa
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.24 or later
 - Linux/Unix system (for FIFO support)
 
 ### Build from source
