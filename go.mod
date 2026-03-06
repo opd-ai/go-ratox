@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.13
 
 require (
-	github.com/opd-ai/toxcore v0.0.0-20260305210218-40a4bf591cdb
+	github.com/opd-ai/toxcore v0.0.0-20260306021244-2e7de0320709
 	github.com/sirupsen/logrus v1.9.4
 )
 
