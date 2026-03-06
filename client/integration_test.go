@@ -154,11 +154,12 @@ func newTestClient(t *testing.T, cfg *config.Config) (*testClient, error) {
 
 	// Create wrapper for testing
 	tc := &testClient{
-		Client:   client,
-		messages: make(chan testMessage, 10),
-		requests: make(chan testFriendRequest, 10),
-		files:    make(chan testFile, 10),
-		statuses: make(chan testStatus, 10),
+		Client:      client,
+		messages:    make(chan testMessage, 10),
+		requests:    make(chan testFriendRequest, 10),
+		files:       make(chan testFile, 10),
+		statuses:    make(chan testStatus, 10),
+		iterateDone: make(chan struct{}),
 	}
 
 	// Override callbacks to capture events for testing
@@ -176,10 +177,11 @@ func newTestClient(t *testing.T, cfg *config.Config) (*testClient, error) {
 // testClient wraps Client with channels for capturing events
 type testClient struct {
 	*Client
-	messages chan testMessage
-	requests chan testFriendRequest
-	files    chan testFile
-	statuses chan testStatus
+	messages    chan testMessage
+	requests    chan testFriendRequest
+	files       chan testFile
+	statuses    chan testStatus
+	iterateDone chan struct{}
 }
 
 type testMessage struct {
@@ -242,6 +244,7 @@ func (tc *testClient) setupTestCallbacks() {
 
 // iterate runs the Tox event loop
 func (tc *testClient) iterate() {
+	defer close(tc.iterateDone)
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -258,7 +261,7 @@ func (tc *testClient) iterate() {
 // shutdown cleanly shuts down the test client
 func (tc *testClient) shutdown() {
 	tc.cancel()
-	time.Sleep(100 * time.Millisecond) // Allow goroutines to stop
+	<-tc.iterateDone // Wait for iterate goroutine to fully stop before Kill
 	if tc.tox != nil {
 		tc.tox.Kill()
 	}
@@ -428,7 +431,7 @@ func testFileTransfer(t *testing.T, client1, client2 *testClient, tmpDir1, tmpDi
 	// Create a test file
 	testData := []byte("This is a test file for ratox-go integration testing!")
 	testFilePath := filepath.Join(tmpDir1, "test_file.txt")
-	if err := os.WriteFile(testFilePath, testData, 0o644); err != nil {
+	if err := os.WriteFile(testFilePath, testData, 0o600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -680,8 +683,8 @@ func TestIntegrationConcurrency(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		go func() {
 			defer func() { done <- true }()
-			for j := 0; j < 100; j++ {
-				_, _ = client.GetFriend(uint32(j))
+			for j := uint32(0); j < 100; j++ {
+				_, _ = client.GetFriend(j)
 				time.Sleep(time.Millisecond)
 			}
 		}()
@@ -689,18 +692,18 @@ func TestIntegrationConcurrency(t *testing.T) {
 
 	// Concurrent writers
 	for i := 0; i < 5; i++ {
-		go func(id int) {
+		go func(id uint32) {
 			defer func() { done <- true }()
-			for j := 0; j < 100; j++ {
+			for j := uint32(0); j < 100; j++ {
 				client.friendsMu.Lock()
-				client.friends[uint32(id*100+j)] = &Friend{
-					ID:   uint32(id*100 + j),
+				client.friends[id*100+j] = &Friend{
+					ID:   id*100 + j,
 					Name: "Test Friend",
 				}
 				client.friendsMu.Unlock()
 				time.Sleep(time.Millisecond)
 			}
-		}(i)
+		}(uint32(i)) //nolint:gosec // i is 0..4, safe to convert
 	}
 
 	// Wait for all goroutines

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -249,7 +250,7 @@ func (c *Client) handleFileReceive(friendID, fileNumber uint32, kind int, fileSi
 	}
 
 	// Check file size limits
-	if c.config.MaxFileSize > 0 && int64(fileSize) > c.config.MaxFileSize {
+	if c.config.MaxFileSize > 0 && fileSize > uint64(c.config.MaxFileSize) { //nolint:gosec // MaxFileSize>0 ensures safe uint64 conversion
 		c.rejectFileTransfer(friendID, fileNumber, fileSize)
 		return
 	}
@@ -346,6 +347,22 @@ func (c *Client) handleFileReceiveChunk(friendID, fileNumber uint32, position ui
 	}
 }
 
+// notifyFileTransferComplete sends a completion notification to the friend's file_out FIFO.
+// msgPrefix is the prefix for the completion message (e.g. "COMPLETE" or "SENT").
+func (c *Client) notifyFileTransferComplete(friendID uint32, filename string, size uint64, msgPrefix string) {
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+
+	if exists {
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		completionMsg := fmt.Sprintf("%s %s %d", msgPrefix, filename, size)
+		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
+			log.Printf("Failed to write file transfer notification: %v", err)
+		}
+	}
+}
+
 func (c *Client) completeFileReceive(friendID uint32, transferKey string, transfer *incomingTransfer) {
 	transfer.File.Close()
 
@@ -354,21 +371,13 @@ func (c *Client) completeFileReceive(friendID uint32, transferKey string, transf
 	c.transfersMu.Unlock()
 
 	log.Printf("File transfer completed: %s (%d bytes)", transfer.Filename, transfer.Received)
-
-	c.friendsMu.RLock()
-	friend, exists := c.friends[friendID]
-	c.friendsMu.RUnlock()
-
-	if exists {
-		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
-		completionMsg := fmt.Sprintf("COMPLETE %s %d", transfer.Filename, transfer.Received)
-		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
-			log.Printf("Failed to write file completion notification: %v", err)
-		}
-	}
+	c.notifyFileTransferComplete(friendID, transfer.Filename, transfer.Received, "COMPLETE")
 }
 
 func (c *Client) writeFileChunk(transfer *incomingTransfer, position uint64, data []byte) error {
+	if position > math.MaxInt64 {
+		return fmt.Errorf("file position %d exceeds maximum supported offset (max: %d)", position, uint64(math.MaxInt64))
+	}
 	if _, err := transfer.File.WriteAt(data, int64(position)); err != nil {
 		if isOutOfDiskSpaceError(err) {
 			log.Printf("Disk full: failed to write file chunk: %v", err)
@@ -419,18 +428,7 @@ func (c *Client) completeFileSend(friendID uint32, transferKey string, transfer 
 	c.transfersMu.Unlock()
 
 	log.Printf("File send completed: %s (%d bytes)", transfer.Filename, transfer.Sent)
-
-	c.friendsMu.RLock()
-	friend, exists := c.friends[friendID]
-	c.friendsMu.RUnlock()
-
-	if exists {
-		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
-		completionMsg := fmt.Sprintf("SENT %s %d", transfer.Filename, transfer.Sent)
-		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
-			log.Printf("Failed to write file send completion notification: %v", err)
-		}
-	}
+	c.notifyFileTransferComplete(friendID, transfer.Filename, transfer.Sent, "SENT")
 }
 
 func (c *Client) abortFileSend(friendID, fileNumber uint32, transferKey string, transfer *outgoingTransfer) {
@@ -477,6 +475,12 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 
 	// Read chunk from file
 	chunk := make([]byte, length)
+	if position > math.MaxInt64 {
+		log.Printf("File position %d exceeds maximum supported offset (max: %d)", position, uint64(math.MaxInt64))
+		c.cancelFileTransfer(friendID, fileNumber)
+		c.abortFileSend(friendID, fileNumber, transferKey, transfer)
+		return
+	}
 	n, err := transfer.File.ReadAt(chunk, int64(position))
 	if err != nil && err != io.EOF {
 		if os.IsNotExist(err) {

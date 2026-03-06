@@ -286,7 +286,7 @@ func (fm *FIFOManager) createIDFile() error {
 	idPath := fm.config.GlobalFIFOPath(ID)
 	toxID := fm.client.GetToxID()
 
-	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(idPath, []byte(toxID+"\n"), 0o600); err != nil {
 		return fmt.Errorf("failed to write ID file: %w", err)
 	}
 
@@ -329,7 +329,7 @@ func (fm *FIFOManager) createConnectionStatusFile() error {
 
 	statusInfo := fmt.Sprintf("connection: %s\nfriends: %d total, %d online\n", statusStr, friendsCount, onlineFriends)
 
-	if err := os.WriteFile(statusPath, []byte(statusInfo), 0o644); err != nil {
+	if err := os.WriteFile(statusPath, []byte(statusInfo), 0o600); err != nil {
 		return fmt.Errorf("failed to write connection status file: %w", err)
 	}
 
@@ -346,7 +346,7 @@ func (fm *FIFOManager) createTransportStatusFile() error {
 
 	transportInfo := fm.getTransportInfo()
 
-	if err := os.WriteFile(statusPath, []byte(transportInfo), 0o644); err != nil {
+	if err := os.WriteFile(statusPath, []byte(transportInfo), 0o600); err != nil {
 		return fmt.Errorf("failed to write transport status file: %w", err)
 	}
 
@@ -800,12 +800,13 @@ func (fm *FIFOManager) validateFileForSending(filePath string) (os.FileInfo, uin
 		return nil, 0, err
 	}
 
-	fileSize := uint64(fileInfo.Size())
-	if fm.client.config.MaxFileSize > 0 && int64(fileSize) > fm.client.config.MaxFileSize {
-		err := fmt.Errorf("file too large (%d bytes), maximum allowed: %d", fileSize, fm.client.config.MaxFileSize)
+	rawSize := fileInfo.Size()
+	if fm.client.config.MaxFileSize > 0 && rawSize > fm.client.config.MaxFileSize {
+		err := fmt.Errorf("file too large (%d bytes), maximum allowed: %d", rawSize, fm.client.config.MaxFileSize)
 		log.Print(err)
 		return nil, 0, err
 	}
+	fileSize := uint64(rawSize) //nolint:gosec // rawSize is non-negative (checked above)
 
 	return fileInfo, fileSize, nil
 }
