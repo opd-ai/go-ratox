@@ -400,7 +400,7 @@ func (c *Client) abortFileReceive(friendID, fileNumber uint32, transferKey strin
 	delete(c.incomingTransfers, transferKey)
 	c.transfersMu.Unlock()
 	c.cancelFileTransfer(friendID, fileNumber)
-	
+
 	// Clean up partial file
 	if filePath != "" {
 		if err := os.Remove(filePath); err != nil {
@@ -438,9 +438,9 @@ func (c *Client) abortFileSend(friendID, fileNumber uint32, transferKey string, 
 	c.transfersMu.Lock()
 	delete(c.outgoingTransfers, transferKey)
 	c.transfersMu.Unlock()
-	
+
 	log.Printf("File send aborted: %s (sent %d/%d bytes)", transfer.Filename, transfer.Sent, transfer.FileSize)
-	
+
 	c.friendsMu.RLock()
 	friend, exists := c.friends[friendID]
 	c.friendsMu.RUnlock()

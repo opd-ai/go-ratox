@@ -408,7 +408,7 @@ func (c *Client) updateConnectionStatus() {
 func (c *Client) monitorStalledTransfers() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
-	
+
 	const transferTimeout = 5 * time.Minute
 
 	for {
@@ -417,14 +417,14 @@ func (c *Client) monitorStalledTransfers() {
 			return
 		case <-ticker.C:
 			now := time.Now()
-			
+
 			// Check incoming transfers
 			c.transfersMu.Lock()
 			for key, transfer := range c.incomingTransfers {
 				if now.Sub(transfer.LastActivity) > transferTimeout {
 					log.Printf("Incoming transfer stalled: %s (last activity: %v ago)",
 						transfer.Filename, now.Sub(transfer.LastActivity))
-					
+
 					// Parse friendID and fileNumber from key
 					var friendID, fileNumber uint32
 					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
@@ -437,13 +437,13 @@ func (c *Client) monitorStalledTransfers() {
 					}
 				}
 			}
-			
+
 			// Check outgoing transfers
 			for key, transfer := range c.outgoingTransfers {
 				if now.Sub(transfer.LastActivity) > transferTimeout {
 					log.Printf("Outgoing transfer stalled: %s (last activity: %v ago)",
 						transfer.Filename, now.Sub(transfer.LastActivity))
-					
+
 					// Parse friendID and fileNumber from key
 					var friendID, fileNumber uint32
 					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
