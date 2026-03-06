@@ -596,11 +596,32 @@ Implementation:
    - Toxcore dependency capabilities
    - Current production-ready state
 
-#### Step 6.3: Add Examples
+#### Step 6.3: Add Examples ✅
 
-1. Add example scripts for conference chat.
-2. Add example scripts for file transfer monitoring.
-3. Add example for friend deletion.
+**Status:** COMPLETE
+
+**Goal:** Provide practical example scripts for new features.
+
+1. ✅ Created `examples/conference_chat.sh`:
+   - Demonstrates conference creation
+   - Shows how to send messages to conferences
+   - Explains friend invitation process
+   - Documents experimental limitations
+2. ✅ Created `examples/file_transfer_monitor.sh`:
+   - Monitors all friend file_out FIFOs
+   - Logs transfer events with timestamps
+   - Tracks incoming, complete, failed, and rejected transfers
+   - Human-readable file size formatting
+3. ✅ Created `examples/friend_deletion.sh`:
+   - Interactive friend selection and deletion
+   - Safety confirmations before deletion
+   - Verification of successful removal
+   - Clear usage summary
+4. ✅ Updated README.md with "Example Scripts" section:
+   - Categorized scripts (Basic Usage vs Advanced Features)
+   - Brief description of each script
+   - Running instructions
+5. ✅ Made all example scripts executable (chmod +x)
 
 ---
 

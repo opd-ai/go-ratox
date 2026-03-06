@@ -503,6 +503,34 @@ go vet ./...
 golangci-lint run
 ```
 
+## Example Scripts
+
+The `examples/` directory contains ready-to-use shell scripts demonstrating various ratox-go features:
+
+### Basic Usage
+- **`basic_usage.sh`** - Introduction to the FIFO interface and common operations
+- **`message_logger.sh`** - Log all messages with timestamps to files
+- **`autoresponder.sh`** - Automated bot that responds to specific messages
+
+### Advanced Features
+- **`conference_chat.sh`** - Create and use group chats (experimental)
+- **`file_transfer_monitor.sh`** - Monitor and log all file transfer activity
+- **`friend_deletion.sh`** - Safely remove friends from your contact list
+
+### Running Examples
+
+```bash
+# Make scripts executable (if needed)
+chmod +x examples/*.sh
+
+# Run an example
+./examples/conference_chat.sh
+./examples/file_transfer_monitor.sh
+./examples/friend_deletion.sh
+```
+
+Each script includes detailed comments and usage instructions. Check the script source for customization options.
+
 ## Troubleshooting
 
 ### Common Issues
