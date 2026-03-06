@@ -43,7 +43,15 @@ The project is functionally sound with all major features implemented as documen
 
 - [x] **Go Version Mismatch in Documentation** — README.md:23, go.mod:3 — README claims "Go 1.21 or later" but go.mod declares `go 1.24.0`. Users with Go 1.21-1.23 may attempt installation and face build issues or unexpected behavior due to toolchain differences. Recommendation: align README with actual minimum tested version or explicitly test backwards compatibility to 1.21. **ADDRESSED**: Updated README.md to require "Go 1.24 or later" to match the go.mod declaration.
 
-- [ ] **Conference Feature Implementation Status Unclear** — README.md:238-251, client/client.go:692-724 — README's architecture section doesn't mention conference support, yet the codebase implements conference creation, messaging, and invitations (client/client.go:692-724, config/config.go:310-315). Test coverage shows `ConferenceDir 0.0%` and `ConferenceFIFOPath 0.0%`, suggesting the feature is unused or untested. Either document the feature or remove dead code.
+- [x] **Conference Feature Implementation Status Unclear** — README.md:238-251, client/client.go:692-724 — README's architecture section doesn't mention conference support, yet the codebase implements conference creation, messaging, and invitations (client/client.go:692-724, config/config.go:310-315). Test coverage shows `ConferenceDir 0.0%` and `ConferenceFIFOPath 0.0%`, suggesting the feature is unused or untested. Either document the feature or remove dead code. **ADDRESSED**: Added comprehensive conference documentation to README.md including:
+  - Added "Conference/group chat support (experimental, send-only)" to Features section
+  - Documented conference directory structure in filesystem interface diagrams
+  - Added "Conference/Group Chat (Experimental)" section with usage examples for creating conferences, sending messages, and inviting friends
+  - Documented known limitations (no incoming messages, no member list, no invite acceptance) due to toxcore API gaps
+  - Updated Architecture section to mention conference handling
+  - Updated Compatibility section to clarify conferences are an extension feature
+  
+  The feature is documented as experimental/send-only with clear limitations, matching its current implementation status.
 
 ### LOW
 

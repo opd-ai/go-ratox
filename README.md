@@ -16,6 +16,7 @@ Ratox is a FIFO (named pipe) based Tox client that provides a filesystem interfa
 - **Graceful error handling** and network interruption recovery
 - **JSON configuration** with persistent settings
 - **Automatic bootstrap** to Tox DHT nodes
+- **Conference/group chat support** (experimental, send-only)
 
 ## Installation
 
@@ -55,7 +56,7 @@ go install github.com/opd-ai/go-ratox@latest
 ./ratox-go -help
 ```
 
-After starting, ratox-go creates a filesystem interface at `~/.config/ratox-go/client/`:
+After starting, ratox-go creates a filesystem interface at `~/.config/ratox-go/`:
 
 ```
 ~/.config/ratox-go/
@@ -64,13 +65,18 @@ After starting, ratox-go creates a filesystem interface at `~/.config/ratox-go/c
 │   ├── request_out     # Read incoming friend requests  
 │   ├── name            # Write to change your name
 │   ├── status_message  # Write to change status message
+│   ├── conference_in   # Create conferences (experimental)
 │   └── config.json     # Configuration file
-└── FRIEND_ID/          # Directory for each friend
-    ├── text_in         # Write messages to send
-    ├── text_out        # Read received messages
-    ├── file_in         # Write file paths to send
-    ├── file_out        # Read incoming file info
-    └── status          # Read friend's status
+├── FRIEND_ID/          # Directory for each friend
+│   ├── text_in         # Write messages to send
+│   ├── text_out        # Read received messages
+│   ├── file_in         # Write file paths to send
+│   ├── file_out        # Read incoming file info
+│   └── status          # Read friend's status
+└── conferences/        # Conference directories (experimental)
+    └── <id>/           # Per-conference FIFOs
+        ├── text_in     # Send conference messages
+        └── invite_in   # Invite friends
 ```
 
 ## Filesystem Interface
@@ -84,14 +90,18 @@ The client creates a directory structure that mirrors the original ratox:
 │   ├── request_out          # Incoming friend requests (read-only)
 │   ├── name                 # Your display name (write-only)
 │   ├── status_message       # Your status message (write-only)
+│   ├── conference_in        # Create new conferences (write-only)
 │   ├── config.json          # Configuration file
 │   └── ratox.tox           # Tox save data
-└── <friend_id>/            # Directory for each friend
-    ├── text_in             # Send messages (write-only)
-    ├── text_out            # Receive messages (read-only)
-    ├── file_in             # Send files (write-only)
-    ├── file_out            # Receive files (read-only)
-    └── status              # Friend status (read-only)
+├── <friend_id>/            # Directory for each friend
+│   ├── text_in             # Send messages (write-only)
+│   ├── text_out            # Receive messages (read-only)
+│   ├── file_in             # Send files (write-only)
+│   ├── file_out            # Receive files (read-only)
+│   └── status              # Friend status (read-only)
+└── conferences/<conference_id>/  # Directory for each conference
+    ├── text_in             # Send conference messages (write-only)
+    └── invite_in           # Invite friends to conference (write-only)
 ```
 
 ### Basic Operations
@@ -145,6 +155,36 @@ tail -f ~/.config/ratox-go/*/text_out
 # Monitor all friend status changes
 watch 'find ~/.config/ratox-go -name status -exec echo {} \; -exec cat {} \;'
 ```
+
+### Conference/Group Chat (Experimental)
+
+**Status:** Conference support is **experimental and send-only**. You can create conferences, send messages, and invite friends, but receiving messages is not yet supported due to toxcore API limitations.
+
+#### Create a conference
+```bash
+# Write anything to conference_in to create a new conference
+echo "create" > ~/.config/ratox-go/client/conference_in
+# The conference ID will be logged in debug output
+```
+
+#### Send a message to a conference
+```bash
+# Replace <conference_id> with the actual numeric ID
+echo "Hello everyone!" > ~/.config/ratox-go/conferences/<conference_id>/text_in
+```
+
+#### Invite a friend to a conference
+```bash
+# Replace <conference_id> and <friend_public_key> with actual values
+echo "<friend_public_key>" > ~/.config/ratox-go/conferences/<conference_id>/invite_in
+```
+
+**Known Limitations:**
+- **No incoming messages**: Conference messages sent by others cannot be received due to missing toxcore callbacks
+- **No member list**: The API doesn't expose conference member enumeration
+- **No invite acceptance**: Accepting conference invites from friends is not yet supported
+
+These limitations will be resolved once the underlying toxcore library adds the necessary callback APIs (`OnConferenceMessage`, `OnConferenceInvite`, etc.).
 
 ## Configuration
 
@@ -256,7 +296,7 @@ ratox-go/
 
 1. **Client**: Core Tox client managing connections and state
 2. **FIFOManager**: Handles all named pipe operations
-3. **Handlers**: Processes Tox events and callbacks
+3. **Handlers**: Processes Tox events and callbacks (friend messages, file transfers, conferences)
 4. **Config**: Configuration management and persistence
 
 ## Development
@@ -358,15 +398,17 @@ Enable debug mode for detailed logging:
 
 ## Compatibility
 
-This implementation maintains full compatibility with the original ratox:
+This implementation maintains full compatibility with the original ratox core features:
 
-- **FIFO Interface**: Identical file structure and behavior
+- **FIFO Interface**: Identical file structure and behavior for friend operations
 - **Message Format**: Compatible message encoding and formatting  
 - **Friend Management**: Same friend request and management workflow
 - **File Transfers**: Compatible file transfer protocol and handling
 - **Status Updates**: Matching status information format and updates
 
 Existing ratox scripts and automation should work without modification.
+
+**Extension:** Conference/group chat support is an additional feature not present in the original ratox, enabled by the toxcore library's group chat API.
 
 ## Performance
 
