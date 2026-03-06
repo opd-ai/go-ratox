@@ -308,42 +308,36 @@ func (c *Client) loadFriends() error {
 	}
 
 	return nil
-} // Run starts the Tox client main loop
-func (c *Client) Run() error {
-	c.mu.Lock()
-	if c.running {
-		c.mu.Unlock()
-		return fmt.Errorf("client is already running")
-	}
-	c.running = true
-	c.mu.Unlock()
+}
 
-	defer func() {
-		c.mu.Lock()
-		c.running = false
-		c.mu.Unlock()
-	}()
-
-	// Start bootstrap server if configured
-	if c.bootstrapServer != nil {
-		if err := c.bootstrapServer.Start(c.ctx); err != nil {
-			return fmt.Errorf("failed to start bootstrap server: %w", err)
-		}
-		if c.config.Debug {
-			bsCfg := c.config.BootstrapServer
-			if bsCfg.ClearnetEnabled {
-				log.Printf("Bootstrap server clearnet: %s", c.bootstrapServer.GetClearnetAddr())
-			}
-			if bsCfg.OnionEnabled {
-				log.Printf("Bootstrap server onion: %s", c.bootstrapServer.GetOnionAddr())
-			}
-			if bsCfg.I2PEnabled {
-				log.Printf("Bootstrap server i2p: %s", c.bootstrapServer.GetI2PAddr())
-			}
-			log.Printf("Bootstrap server public key: %s", c.bootstrapServer.GetPublicKeyHex())
-		}
+// startBootstrapServer starts the bootstrap server if configured
+func (c *Client) startBootstrapServer() error {
+	if c.bootstrapServer == nil {
+		return nil
 	}
 
+	if err := c.bootstrapServer.Start(c.ctx); err != nil {
+		return fmt.Errorf("failed to start bootstrap server: %w", err)
+	}
+
+	if c.config.Debug {
+		bsCfg := c.config.BootstrapServer
+		if bsCfg.ClearnetEnabled {
+			log.Printf("Bootstrap server clearnet: %s", c.bootstrapServer.GetClearnetAddr())
+		}
+		if bsCfg.OnionEnabled {
+			log.Printf("Bootstrap server onion: %s", c.bootstrapServer.GetOnionAddr())
+		}
+		if bsCfg.I2PEnabled {
+			log.Printf("Bootstrap server i2p: %s", c.bootstrapServer.GetI2PAddr())
+		}
+		log.Printf("Bootstrap server public key: %s", c.bootstrapServer.GetPublicKeyHex())
+	}
+	return nil
+}
+
+// startBackgroundWorkers launches all background goroutines
+func (c *Client) startBackgroundWorkers() {
 	// Start FIFO manager
 	c.wg.Add(1)
 	go func() {
@@ -378,6 +372,29 @@ func (c *Client) Run() error {
 		defer c.wg.Done()
 		c.monitorStalledTransfers()
 	}()
+}
+
+// Run starts the Tox client main loop
+func (c *Client) Run() error {
+	c.mu.Lock()
+	if c.running {
+		c.mu.Unlock()
+		return fmt.Errorf("client is already running")
+	}
+	c.running = true
+	c.mu.Unlock()
+
+	defer func() {
+		c.mu.Lock()
+		c.running = false
+		c.mu.Unlock()
+	}()
+
+	if err := c.startBootstrapServer(); err != nil {
+		return err
+	}
+
+	c.startBackgroundWorkers()
 
 	// Main Tox iteration loop with dynamic interval
 	for {
@@ -462,6 +479,47 @@ func (c *Client) updateConnectionStatus() {
 }
 
 // monitorStalledTransfers checks for and cancels stalled file transfers
+func (c *Client) checkIncomingTransfers(now time.Time, timeout time.Duration) {
+	for key, transfer := range c.incomingTransfers {
+		if now.Sub(transfer.LastActivity) <= timeout {
+			continue
+		}
+
+		log.Printf("Incoming transfer stalled: %s (last activity: %v ago)",
+			transfer.Filename, now.Sub(transfer.LastActivity))
+
+		var friendID, fileNumber uint32
+		if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
+			transferCopy := *transfer
+			keyCopy := key
+			c.transfersMu.Unlock()
+			c.abortFileReceive(friendID, fileNumber, keyCopy, &transferCopy)
+			c.transfersMu.Lock()
+		}
+	}
+}
+
+func (c *Client) checkOutgoingTransfers(now time.Time, timeout time.Duration) {
+	for key, transfer := range c.outgoingTransfers {
+		if now.Sub(transfer.LastActivity) <= timeout {
+			continue
+		}
+
+		log.Printf("Outgoing transfer stalled: %s (last activity: %v ago)",
+			transfer.Filename, now.Sub(transfer.LastActivity))
+
+		var friendID, fileNumber uint32
+		if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
+			transferCopy := *transfer
+			keyCopy := key
+			c.transfersMu.Unlock()
+			c.cancelFileTransfer(friendID, fileNumber)
+			c.abortFileSend(friendID, fileNumber, keyCopy, &transferCopy)
+			c.transfersMu.Lock()
+		}
+	}
+}
+
 func (c *Client) monitorStalledTransfers() {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
@@ -474,46 +532,9 @@ func (c *Client) monitorStalledTransfers() {
 			return
 		case <-ticker.C:
 			now := time.Now()
-
-			// Check incoming transfers
 			c.transfersMu.Lock()
-			for key, transfer := range c.incomingTransfers {
-				if now.Sub(transfer.LastActivity) > transferTimeout {
-					log.Printf("Incoming transfer stalled: %s (last activity: %v ago)",
-						transfer.Filename, now.Sub(transfer.LastActivity))
-
-					// Parse friendID and fileNumber from key
-					var friendID, fileNumber uint32
-					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
-						// Abort the transfer (must be done without holding the lock)
-						transferCopy := *transfer
-						keyCopy := key
-						c.transfersMu.Unlock()
-						c.abortFileReceive(friendID, fileNumber, keyCopy, &transferCopy)
-						c.transfersMu.Lock()
-					}
-				}
-			}
-
-			// Check outgoing transfers
-			for key, transfer := range c.outgoingTransfers {
-				if now.Sub(transfer.LastActivity) > transferTimeout {
-					log.Printf("Outgoing transfer stalled: %s (last activity: %v ago)",
-						transfer.Filename, now.Sub(transfer.LastActivity))
-
-					// Parse friendID and fileNumber from key
-					var friendID, fileNumber uint32
-					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
-						// Abort the transfer (must be done without holding the lock)
-						transferCopy := *transfer
-						keyCopy := key
-						c.transfersMu.Unlock()
-						c.cancelFileTransfer(friendID, fileNumber)
-						c.abortFileSend(friendID, fileNumber, keyCopy, &transferCopy)
-						c.transfersMu.Lock()
-					}
-				}
-			}
+			c.checkIncomingTransfers(now, transferTimeout)
+			c.checkOutgoingTransfers(now, transferTimeout)
 			c.transfersMu.Unlock()
 		}
 	}

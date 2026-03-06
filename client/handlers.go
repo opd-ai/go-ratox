@@ -453,6 +453,23 @@ func (c *Client) abortFileSend(friendID, fileNumber uint32, transferKey string, 
 }
 
 // handleFileChunkRequest processes outgoing file chunk requests
+func (c *Client) readFileChunk(transfer *outgoingTransfer, position uint64, length int) ([]byte, error) {
+	if position > math.MaxInt64 {
+		return nil, fmt.Errorf("file position %d exceeds maximum supported offset (max: %d)", position, uint64(math.MaxInt64))
+	}
+
+	chunk := make([]byte, length)
+	n, err := transfer.File.ReadAt(chunk, int64(position))
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+
+	if n > 0 {
+		return chunk[:n], nil
+	}
+	return nil, io.EOF
+}
+
 func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position uint64, length int) {
 	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
 
@@ -465,7 +482,6 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 		return
 	}
 
-	// If length is 0, the transfer is being paused
 	if length == 0 {
 		if c.config.Debug {
 			log.Printf("File transfer paused for key %s", transferKey)
@@ -473,15 +489,7 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 		return
 	}
 
-	// Read chunk from file
-	chunk := make([]byte, length)
-	if position > math.MaxInt64 {
-		log.Printf("File position %d exceeds maximum supported offset (max: %d)", position, uint64(math.MaxInt64))
-		c.cancelFileTransfer(friendID, fileNumber)
-		c.abortFileSend(friendID, fileNumber, transferKey, transfer)
-		return
-	}
-	n, err := transfer.File.ReadAt(chunk, int64(position))
+	chunk, err := c.readFileChunk(transfer, position, length)
 	if err != nil && err != io.EOF {
 		if os.IsNotExist(err) {
 			log.Printf("File no longer exists: %s (%v)", transfer.FilePath, err)
@@ -493,14 +501,11 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 		return
 	}
 
-	// Send the chunk (or empty chunk if EOF)
 	var dataToSend []byte
-	if n > 0 {
-		dataToSend = chunk[:n]
-		transfer.Sent += uint64(n)
+	if err != io.EOF {
+		dataToSend = chunk
+		transfer.Sent += uint64(len(chunk))
 		transfer.LastActivity = time.Now()
-	} else {
-		dataToSend = nil // Empty chunk signals EOF
 	}
 
 	if err := c.tox.FileSendChunk(friendID, fileNumber, position, dataToSend); err != nil {
@@ -510,12 +515,11 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 		return
 	}
 
-	// If we sent an empty chunk (EOF), complete the transfer
 	if dataToSend == nil {
 		c.completeFileSend(friendID, transferKey, transfer)
 	} else if c.config.Debug {
 		log.Printf("Sent file chunk: %d bytes at position %d (%d/%d total)",
-			n, position, transfer.Sent, transfer.FileSize)
+			len(chunk), position, transfer.Sent, transfer.FileSize)
 	}
 }
 

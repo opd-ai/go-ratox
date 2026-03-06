@@ -18,6 +18,573 @@
   },
   "functions": [
     {
+      "name": "main",
+      "package": "main",
+      "file": "main.go",
+      "line": 34,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 13,
+        "code": 10,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "setupLogging",
+      "package": "main",
+      "file": "main.go",
+      "line": 50,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 7,
+        "code": 7,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "parseAndValidateFlags",
+      "package": "main",
+      "file": "main.go",
+      "line": 60,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 18,
+        "code": 15,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "determineConfigDir",
+      "package": "main",
+      "file": "main.go",
+      "line": 81,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 43,
+        "code": 38,
+        "comments": 0,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "loadOrCreateConfig",
+      "package": "main",
+      "file": "main.go",
+      "line": 127,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 32,
+        "code": 28,
+        "comments": 0,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "createToxClient",
+      "package": "main",
+      "file": "main.go",
+      "line": 162,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 15,
+        "code": 13,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "runClientWithGracefulShutdown",
+      "package": "main",
+      "file": "main.go",
+      "line": 180,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 32,
+        "code": 29,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "printUsage",
+      "package": "main",
+      "file": "main.go",
+      "line": 215,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 24,
+        "code": 22,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "Load",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 128,
+      "is_exported": true,
+      "is_method": false,
+      "lines": {
+        "total": 117,
+        "code": 99,
+        "comments": 4,
+        "blank": 14
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 120,
+        "has_example": false,
+        "quality_score": 0.4
+      }
+    },
+    {
+      "name": "Save",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 249,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 42,
+        "code": 35,
+        "comments": 0,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 37,
+        "has_example": false,
+        "quality_score": 0.148
+      }
+    },
+    {
+      "name": "FriendDir",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 295,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.33599999999999997
+      }
+    },
+    {
+      "name": "GlobalFIFOPath",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 300,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 55,
+        "has_example": false,
+        "quality_score": 0.32000000000000006
+      }
+    },
+    {
+      "name": "FriendFIFOPath",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 305,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 64,
+        "has_example": false,
+        "quality_score": 0.356
+      }
+    },
+    {
+      "name": "ConferenceDir",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 310,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 67,
+        "has_example": false,
+        "quality_score": 0.368
+      }
+    },
+    {
+      "name": "ConferenceFIFOPath",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 315,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 1,
+        "code": 1,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 72,
+        "has_example": false,
+        "quality_score": 0.388
+      }
+    },
+    {
+      "name": "ValidateTransport",
+      "package": "config",
+      "file": "config/config.go",
+      "line": 323,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Config",
+      "lines": {
+        "total": 7,
+        "code": 4,
+        "comments": 3,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 264,
+        "has_example": false,
+        "quality_score": 0.4
+      }
+    },
+    {
       "name": "New",
       "package": "client",
       "file": "client/client.go",
@@ -305,18 +872,18 @@
       }
     },
     {
-      "name": "Run",
+      "name": "startBootstrapServer",
       "package": "client",
       "file": "client/client.go",
-      "line": 312,
-      "is_exported": true,
+      "line": 314,
+      "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
       "lines": {
-        "total": 81,
-        "code": 66,
-        "comments": 7,
-        "blank": 8
+        "total": 22,
+        "code": 20,
+        "comments": 0,
+        "blank": 2
       },
       "signature": {
         "parameter_count": 0,
@@ -328,23 +895,95 @@
         "signature_complexity": 0.3
       },
       "complexity": {
-        "cyclomatic": 13,
-        "cognitive": 13,
-        "nesting_depth": 3,
-        "overall": 18.4
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 2,
+        "overall": 10.1
       },
       "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
+        "has_comment": true,
+        "comment_length": 63,
         "has_example": false,
-        "quality_score": 0
+        "quality_score": 0.252
+      }
+    },
+    {
+      "name": "startBackgroundWorkers",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 340,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 34,
+        "code": 25,
+        "comments": 5,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 58,
+        "has_example": false,
+        "quality_score": 0.23199999999999998
+      }
+    },
+    {
+      "name": "Run",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 378,
+      "is_exported": true,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 32,
+        "code": 27,
+        "comments": 1,
+        "blank": 4
+      },
+      "signature": {
+        "parameter_count": 0,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.3
+      },
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 8,
+        "nesting_depth": 2,
+        "overall": 11.4
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 36,
+        "has_example": false,
+        "quality_score": 0.144
       }
     },
     {
       "name": "initBootstrapServer",
       "package": "client",
       "file": "client/client.go",
-      "line": 397,
+      "line": 414,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
@@ -380,7 +1019,7 @@
       "name": "bootstrap",
       "package": "client",
       "file": "client/client.go",
-      "line": 416,
+      "line": 433,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
@@ -416,7 +1055,7 @@
       "name": "autoSave",
       "package": "client",
       "file": "client/client.go",
-      "line": 429,
+      "line": 446,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
@@ -452,7 +1091,7 @@
       "name": "updateConnectionStatus",
       "package": "client",
       "file": "client/client.go",
-      "line": 446,
+      "line": 463,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
@@ -485,18 +1124,90 @@
       }
     },
     {
-      "name": "monitorStalledTransfers",
+      "name": "checkIncomingTransfers",
       "package": "client",
       "file": "client/client.go",
-      "line": 465,
+      "line": 482,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
       "lines": {
-        "total": 54,
-        "code": 42,
-        "comments": 6,
-        "blank": 6
+        "total": 17,
+        "code": 15,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 70,
+        "has_example": false,
+        "quality_score": 0.27999999999999997
+      }
+    },
+    {
+      "name": "checkOutgoingTransfers",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 502,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 18,
+        "code": 16,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "monitorStalledTransfers",
+      "package": "client",
+      "file": "client/client.go",
+      "line": 523,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 17,
+        "code": 15,
+        "comments": 0,
+        "blank": 2
       },
       "signature": {
         "parameter_count": 0,
@@ -508,23 +1219,23 @@
         "signature_complexity": 0
       },
       "complexity": {
-        "cyclomatic": 11,
-        "cognitive": 11,
-        "nesting_depth": 5,
-        "overall": 16.8
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
       },
       "documentation": {
-        "has_comment": true,
-        "comment_length": 70,
+        "has_comment": false,
+        "comment_length": 0,
         "has_example": false,
-        "quality_score": 0.27999999999999997
+        "quality_score": 0
       }
     },
     {
       "name": "saveToxData",
       "package": "client",
       "file": "client/client.go",
-      "line": 523,
+      "line": 544,
       "is_exported": false,
       "is_method": true,
       "receiver_type": "*Client",
@@ -560,7 +1271,7 @@
       "name": "Shutdown",
       "package": "client",
       "file": "client/client.go",
-      "line": 533,
+      "line": 554,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -596,7 +1307,7 @@
       "name": "GetToxID",
       "package": "client",
       "file": "client/client.go",
-      "line": 578,
+      "line": 599,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -632,7 +1343,7 @@
       "name": "GetFriend",
       "package": "client",
       "file": "client/client.go",
-      "line": 583,
+      "line": 604,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -668,7 +1379,7 @@
       "name": "SendMessage",
       "package": "client",
       "file": "client/client.go",
-      "line": 591,
+      "line": 612,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -704,7 +1415,7 @@
       "name": "AddFriend",
       "package": "client",
       "file": "client/client.go",
-      "line": 606,
+      "line": 627,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -740,7 +1451,7 @@
       "name": "AcceptFriendRequest",
       "package": "client",
       "file": "client/client.go",
-      "line": 635,
+      "line": 656,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -776,7 +1487,7 @@
       "name": "UpdateSelfName",
       "package": "client",
       "file": "client/client.go",
-      "line": 672,
+      "line": 693,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -812,7 +1523,7 @@
       "name": "UpdateSelfStatusMessage",
       "package": "client",
       "file": "client/client.go",
-      "line": 687,
+      "line": 708,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -848,7 +1559,7 @@
       "name": "CreateConference",
       "package": "client",
       "file": "client/client.go",
-      "line": 702,
+      "line": 723,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -884,7 +1595,7 @@
       "name": "SendConferenceMessage",
       "package": "client",
       "file": "client/client.go",
-      "line": 723,
+      "line": 744,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -920,7 +1631,7 @@
       "name": "InviteToConference",
       "package": "client",
       "file": "client/client.go",
-      "line": 732,
+      "line": 753,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -953,96 +1664,27 @@
       }
     },
     {
-      "name": "main",
-      "package": "main",
-      "file": "main.go",
-      "line": 34,
+      "name": "handleFriendRequest",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 19,
       "is_exported": false,
-      "is_method": false,
+      "is_method": true,
+      "receiver_type": "*Client",
       "lines": {
-        "total": 13,
-        "code": 10,
-        "comments": 0,
-        "blank": 3
+        "total": 11,
+        "code": 8,
+        "comments": 1,
+        "blank": 2
       },
       "signature": {
-        "parameter_count": 0,
+        "parameter_count": 2,
         "return_count": 0,
         "has_variadic": false,
         "returns_error": false,
         "interface_parameters": 0,
         "generic_parameters": null,
-        "signature_complexity": 0
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
-        "nesting_depth": 1,
-        "overall": 3.1
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "setupLogging",
-      "package": "main",
-      "file": "main.go",
-      "line": 50,
-      "is_exported": false,
-      "is_method": false,
-      "lines": {
-        "total": 7,
-        "code": 7,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 0,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "parseAndValidateFlags",
-      "package": "main",
-      "file": "main.go",
-      "line": 60,
-      "is_exported": false,
-      "is_method": false,
-      "lines": {
-        "total": 18,
-        "code": 15,
-        "comments": 0,
-        "blank": 3
-      },
-      "signature": {
-        "parameter_count": 0,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.3
+        "signature_complexity": 1
       },
       "complexity": {
         "cyclomatic": 3,
@@ -1051,129 +1693,241 @@
         "overall": 4.4
       },
       "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
+        "has_comment": true,
+        "comment_length": 55,
         "has_example": false,
-        "quality_score": 0
+        "quality_score": 0.22000000000000003
       }
     },
     {
-      "name": "determineConfigDir",
-      "package": "main",
-      "file": "main.go",
-      "line": 81,
+      "name": "handleFriendMessage",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 34,
       "is_exported": false,
-      "is_method": false,
+      "is_method": true,
+      "receiver_type": "*Client",
       "lines": {
-        "total": 43,
-        "code": 38,
-        "comments": 0,
-        "blank": 5
+        "total": 32,
+        "code": 23,
+        "comments": 3,
+        "blank": 6
       },
       "signature": {
-        "parameter_count": 0,
-        "return_count": 1,
+        "parameter_count": 3,
+        "return_count": 0,
         "has_variadic": false,
         "returns_error": false,
         "interface_parameters": 0,
         "generic_parameters": null,
-        "signature_complexity": 0.3
+        "signature_complexity": 1.5
       },
       "complexity": {
-        "cyclomatic": 4,
-        "cognitive": 4,
-        "nesting_depth": 2,
-        "overall": 6.2
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 1,
+        "overall": 7
       },
       "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
+        "has_comment": true,
+        "comment_length": 61,
         "has_example": false,
-        "quality_score": 0
+        "quality_score": 0.244
       }
     },
     {
-      "name": "loadOrCreateConfig",
-      "package": "main",
-      "file": "main.go",
-      "line": 127,
+      "name": "handleFriendNameChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 70,
       "is_exported": false,
-      "is_method": false,
+      "is_method": true,
+      "receiver_type": "*Client",
       "lines": {
-        "total": 32,
-        "code": 28,
+        "total": 26,
+        "code": 21,
+        "comments": 3,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 7,
+        "nesting_depth": 3,
+        "overall": 10.6
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 53,
+        "has_example": false,
+        "quality_score": 0.21200000000000002
+      }
+    },
+    {
+      "name": "handleFriendStatusChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 100,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 28,
+        "code": 24,
+        "comments": 1,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 57,
+        "has_example": false,
+        "quality_score": 0.22799999999999998
+      }
+    },
+    {
+      "name": "handleFriendConnectionStatusChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 132,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 30,
+        "code": 26,
+        "comments": 1,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 78,
+        "has_example": false,
+        "quality_score": 0.31200000000000006
+      }
+    },
+    {
+      "name": "handleFriendStatusMessageChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 166,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 18,
+        "code": 15,
+        "comments": 1,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 5,
+        "nesting_depth": 2,
+        "overall": 7.5
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 72,
+        "has_example": false,
+        "quality_score": 0.288
+      }
+    },
+    {
+      "name": "handleFriendTyping",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 188,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 21,
+        "code": 17,
         "comments": 0,
         "blank": 4
       },
       "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
+        "parameter_count": 2,
+        "return_count": 0,
         "has_variadic": false,
         "returns_error": false,
         "interface_parameters": 0,
         "generic_parameters": null,
-        "signature_complexity": 0.8
+        "signature_complexity": 1
       },
       "complexity": {
-        "cyclomatic": 4,
-        "cognitive": 4,
-        "nesting_depth": 2,
-        "overall": 6.2
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "createToxClient",
-      "package": "main",
-      "file": "main.go",
-      "line": 162,
-      "is_exported": false,
-      "is_method": false,
-      "lines": {
-        "total": 15,
-        "code": 13,
-        "comments": 0,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
+        "cyclomatic": 5,
+        "cognitive": 5,
         "nesting_depth": 1,
-        "overall": 3.1
+        "overall": 7
       },
       "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
+        "has_comment": true,
+        "comment_length": 57,
         "has_example": false,
-        "quality_score": 0
+        "quality_score": 0.22799999999999998
       }
     },
     {
-      "name": "runClientWithGracefulShutdown",
-      "package": "main",
-      "file": "main.go",
-      "line": 180,
+      "name": "handleSelfConnectionStatusChange",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 213,
       "is_exported": false,
-      "is_method": false,
+      "is_method": true,
+      "receiver_type": "*Client",
       "lines": {
-        "total": 32,
-        "code": 29,
-        "comments": 0,
-        "blank": 3
+        "total": 21,
+        "code": 19,
+        "comments": 1,
+        "blank": 1
       },
       "signature": {
         "parameter_count": 1,
@@ -1191,6 +1945,78 @@
         "overall": 7.5
       },
       "documentation": {
+        "has_comment": true,
+        "comment_length": 74,
+        "has_example": false,
+        "quality_score": 0.296
+      }
+    },
+    {
+      "name": "handleFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 238,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 31,
+        "code": 22,
+        "comments": 3,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 4,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 2
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 1,
+        "overall": 8.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 60,
+        "has_example": false,
+        "quality_score": 0.24
+      }
+    },
+    {
+      "name": "rejectFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 272,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 4,
+        "code": 4,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 2,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
         "has_comment": false,
         "comment_length": 0,
         "has_example": false,
@@ -1198,26 +2024,171 @@
       }
     },
     {
-      "name": "printUsage",
-      "package": "main",
-      "file": "main.go",
-      "line": 215,
+      "name": "acceptFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 279,
       "is_exported": false,
-      "is_method": false,
+      "is_method": true,
+      "receiver_type": "*Client",
       "lines": {
-        "total": 24,
-        "code": 22,
+        "total": 31,
+        "code": 28,
         "comments": 0,
-        "blank": 2
+        "blank": 3
       },
       "signature": {
-        "parameter_count": 0,
+        "parameter_count": 3,
         "return_count": 0,
         "has_variadic": false,
         "returns_error": false,
         "interface_parameters": 0,
         "generic_parameters": null,
-        "signature_complexity": 0
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 1,
+        "overall": 4.4
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "cancelFileTransfer",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 313,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 3,
+        "code": 3,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.5
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "handleFileReceiveChunk",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 320,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 27,
+        "code": 22,
+        "comments": 0,
+        "blank": 5
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 2,
+        "overall": 8.8
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 59,
+        "has_example": false,
+        "quality_score": 0.236
+      }
+    },
+    {
+      "name": "notifyFileTransferComplete",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 352,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 11,
+        "code": 10,
+        "comments": 0,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 4,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 2
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 2,
+        "overall": 4.9
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 170,
+        "has_example": false,
+        "quality_score": 0.4
+      }
+    },
+    {
+      "name": "completeFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 366,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 8,
+        "code": 6,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
       },
       "complexity": {
         "cyclomatic": 1,
@@ -1230,6 +2201,293 @@
         "comment_length": 0,
         "has_example": false,
         "quality_score": 0
+      }
+    },
+    {
+      "name": "writeFileChunk",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 377,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 14,
+        "code": 14,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.8
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 2,
+        "overall": 6.2
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "isOutOfDiskSpaceError",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 395,
+      "is_exported": false,
+      "is_method": false,
+      "lines": {
+        "total": 7,
+        "code": 7,
+        "comments": 0,
+        "blank": 0
+      },
+      "signature": {
+        "parameter_count": 1,
+        "return_count": 1,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 0.8
+      },
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 2,
+        "nesting_depth": 1,
+        "overall": 3.1
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 69,
+        "has_example": false,
+        "quality_score": 0.376
+      }
+    },
+    {
+      "name": "abortFileReceive",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 405,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 15,
+        "code": 13,
+        "comments": 1,
+        "blank": 1
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 2,
+        "overall": 4.9
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "completeFileSend",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 423,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 8,
+        "code": 6,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 1,
+        "nesting_depth": 0,
+        "overall": 1.3
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "abortFileSend",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 434,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 18,
+        "code": 15,
+        "comments": 0,
+        "blank": 3
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "nesting_depth": 2,
+        "overall": 4.9
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "readFileChunk",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 456,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 14,
+        "code": 12,
+        "comments": 0,
+        "blank": 2
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 2,
+        "has_variadic": false,
+        "returns_error": true,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 2.1
+      },
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 4,
+        "nesting_depth": 1,
+        "overall": 5.7
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 62,
+        "has_example": false,
+        "quality_score": 0.248
+      }
+    },
+    {
+      "name": "handleFileChunkRequest",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 473,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 50,
+        "code": 43,
+        "comments": 0,
+        "blank": 7
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 10,
+        "nesting_depth": 2,
+        "overall": 14
+      },
+      "documentation": {
+        "has_comment": false,
+        "comment_length": 0,
+        "has_example": false,
+        "quality_score": 0
+      }
+    },
+    {
+      "name": "handleAsyncMessage",
+      "package": "client",
+      "file": "client/handlers.go",
+      "line": 527,
+      "is_exported": false,
+      "is_method": true,
+      "receiver_type": "*Client",
+      "lines": {
+        "total": 33,
+        "code": 27,
+        "comments": 0,
+        "blank": 6
+      },
+      "signature": {
+        "parameter_count": 3,
+        "return_count": 0,
+        "has_variadic": false,
+        "returns_error": false,
+        "interface_parameters": 0,
+        "generic_parameters": null,
+        "signature_complexity": 1.5
+      },
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "nesting_depth": 1,
+        "overall": 8.3
+      },
+      "documentation": {
+        "has_comment": true,
+        "comment_length": 63,
+        "has_example": false,
+        "quality_score": 0.252
       }
     },
     {
@@ -2848,1084 +4106,6 @@
         "has_example": false,
         "quality_score": 0.248
       }
-    },
-    {
-      "name": "Load",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 128,
-      "is_exported": true,
-      "is_method": false,
-      "lines": {
-        "total": 117,
-        "code": 99,
-        "comments": 4,
-        "blank": 14
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 2,
-        "has_variadic": false,
-        "returns_error": true,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.1
-      },
-      "complexity": {
-        "cyclomatic": 4,
-        "cognitive": 4,
-        "nesting_depth": 2,
-        "overall": 6.2
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 120,
-        "has_example": false,
-        "quality_score": 0.4
-      }
-    },
-    {
-      "name": "Save",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 249,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 42,
-        "code": 35,
-        "comments": 0,
-        "blank": 7
-      },
-      "signature": {
-        "parameter_count": 0,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": true,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.3
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 1,
-        "overall": 4.4
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 37,
-        "has_example": false,
-        "quality_score": 0.148
-      }
-    },
-    {
-      "name": "FriendDir",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 295,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 1,
-        "code": 1,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 59,
-        "has_example": false,
-        "quality_score": 0.33599999999999997
-      }
-    },
-    {
-      "name": "GlobalFIFOPath",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 300,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 1,
-        "code": 1,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 55,
-        "has_example": false,
-        "quality_score": 0.32000000000000006
-      }
-    },
-    {
-      "name": "FriendFIFOPath",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 305,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 1,
-        "code": 1,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 64,
-        "has_example": false,
-        "quality_score": 0.356
-      }
-    },
-    {
-      "name": "ConferenceDir",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 310,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 1,
-        "code": 1,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 67,
-        "has_example": false,
-        "quality_score": 0.368
-      }
-    },
-    {
-      "name": "ConferenceFIFOPath",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 315,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 1,
-        "code": 1,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 72,
-        "has_example": false,
-        "quality_score": 0.388
-      }
-    },
-    {
-      "name": "ValidateTransport",
-      "package": "config",
-      "file": "config/config.go",
-      "line": 323,
-      "is_exported": true,
-      "is_method": true,
-      "receiver_type": "*Config",
-      "lines": {
-        "total": 7,
-        "code": 4,
-        "comments": 3,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 0,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": true,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.3
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
-        "nesting_depth": 1,
-        "overall": 3.1
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 264,
-        "has_example": false,
-        "quality_score": 0.4
-      }
-    },
-    {
-      "name": "handleFriendRequest",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 19,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 11,
-        "code": 8,
-        "comments": 1,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 1,
-        "overall": 4.4
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 55,
-        "has_example": false,
-        "quality_score": 0.22000000000000003
-      }
-    },
-    {
-      "name": "handleFriendMessage",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 34,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 32,
-        "code": 23,
-        "comments": 3,
-        "blank": 6
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 5,
-        "cognitive": 5,
-        "nesting_depth": 1,
-        "overall": 7
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 61,
-        "has_example": false,
-        "quality_score": 0.244
-      }
-    },
-    {
-      "name": "handleFriendNameChange",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 70,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 26,
-        "code": 21,
-        "comments": 3,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 7,
-        "cognitive": 7,
-        "nesting_depth": 3,
-        "overall": 10.6
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 53,
-        "has_example": false,
-        "quality_score": 0.21200000000000002
-      }
-    },
-    {
-      "name": "handleFriendStatusChange",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 100,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 28,
-        "code": 24,
-        "comments": 1,
-        "blank": 3
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 6,
-        "cognitive": 6,
-        "nesting_depth": 2,
-        "overall": 8.8
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 57,
-        "has_example": false,
-        "quality_score": 0.22799999999999998
-      }
-    },
-    {
-      "name": "handleFriendConnectionStatusChange",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 132,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 30,
-        "code": 26,
-        "comments": 1,
-        "blank": 3
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 6,
-        "cognitive": 6,
-        "nesting_depth": 2,
-        "overall": 8.8
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 78,
-        "has_example": false,
-        "quality_score": 0.31200000000000006
-      }
-    },
-    {
-      "name": "handleFriendStatusMessageChange",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 166,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 18,
-        "code": 15,
-        "comments": 1,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 5,
-        "cognitive": 5,
-        "nesting_depth": 2,
-        "overall": 7.5
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 72,
-        "has_example": false,
-        "quality_score": 0.288
-      }
-    },
-    {
-      "name": "handleFriendTyping",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 188,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 21,
-        "code": 17,
-        "comments": 0,
-        "blank": 4
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 5,
-        "cognitive": 5,
-        "nesting_depth": 1,
-        "overall": 7
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 57,
-        "has_example": false,
-        "quality_score": 0.22799999999999998
-      }
-    },
-    {
-      "name": "handleSelfConnectionStatusChange",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 213,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 21,
-        "code": 19,
-        "comments": 1,
-        "blank": 1
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.5
-      },
-      "complexity": {
-        "cyclomatic": 5,
-        "cognitive": 5,
-        "nesting_depth": 2,
-        "overall": 7.5
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 74,
-        "has_example": false,
-        "quality_score": 0.296
-      }
-    },
-    {
-      "name": "handleFileReceive",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 238,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 31,
-        "code": 22,
-        "comments": 3,
-        "blank": 6
-      },
-      "signature": {
-        "parameter_count": 4,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 2
-      },
-      "complexity": {
-        "cyclomatic": 6,
-        "cognitive": 6,
-        "nesting_depth": 1,
-        "overall": 8.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 60,
-        "has_example": false,
-        "quality_score": 0.24
-      }
-    },
-    {
-      "name": "rejectFileTransfer",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 272,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 4,
-        "code": 4,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 2,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
-        "nesting_depth": 1,
-        "overall": 3.1
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "acceptFileTransfer",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 279,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 31,
-        "code": 28,
-        "comments": 0,
-        "blank": 3
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 1,
-        "overall": 4.4
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "cancelFileTransfer",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 313,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 3,
-        "code": 3,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.5
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
-        "nesting_depth": 1,
-        "overall": 3.1
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "handleFileReceiveChunk",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 320,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 27,
-        "code": 22,
-        "comments": 0,
-        "blank": 5
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 6,
-        "cognitive": 6,
-        "nesting_depth": 2,
-        "overall": 8.8
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 59,
-        "has_example": false,
-        "quality_score": 0.236
-      }
-    },
-    {
-      "name": "notifyFileTransferComplete",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 352,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 11,
-        "code": 10,
-        "comments": 0,
-        "blank": 1
-      },
-      "signature": {
-        "parameter_count": 4,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 2
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 2,
-        "overall": 4.9
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 170,
-        "has_example": false,
-        "quality_score": 0.4
-      }
-    },
-    {
-      "name": "completeFileReceive",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 366,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 8,
-        "code": 6,
-        "comments": 0,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "writeFileChunk",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 377,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 14,
-        "code": 14,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": true,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.8
-      },
-      "complexity": {
-        "cyclomatic": 4,
-        "cognitive": 4,
-        "nesting_depth": 2,
-        "overall": 6.2
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "isOutOfDiskSpaceError",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 395,
-      "is_exported": false,
-      "is_method": false,
-      "lines": {
-        "total": 7,
-        "code": 7,
-        "comments": 0,
-        "blank": 0
-      },
-      "signature": {
-        "parameter_count": 1,
-        "return_count": 1,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 0.8
-      },
-      "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
-        "nesting_depth": 1,
-        "overall": 3.1
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 69,
-        "has_example": false,
-        "quality_score": 0.376
-      }
-    },
-    {
-      "name": "abortFileReceive",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 405,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 15,
-        "code": 13,
-        "comments": 1,
-        "blank": 1
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 2,
-        "overall": 4.9
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "completeFileSend",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 423,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 8,
-        "code": 6,
-        "comments": 0,
-        "blank": 2
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 1,
-        "cognitive": 1,
-        "nesting_depth": 0,
-        "overall": 1.3
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "abortFileSend",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 434,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 18,
-        "code": 15,
-        "comments": 0,
-        "blank": 3
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 3,
-        "cognitive": 3,
-        "nesting_depth": 2,
-        "overall": 4.9
-      },
-      "documentation": {
-        "has_comment": false,
-        "comment_length": 0,
-        "has_example": false,
-        "quality_score": 0
-      }
-    },
-    {
-      "name": "handleFileChunkRequest",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 456,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 63,
-        "code": 52,
-        "comments": 4,
-        "blank": 7
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 11,
-        "cognitive": 11,
-        "nesting_depth": 2,
-        "overall": 15.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 62,
-        "has_example": false,
-        "quality_score": 0.248
-      }
-    },
-    {
-      "name": "handleAsyncMessage",
-      "package": "client",
-      "file": "client/handlers.go",
-      "line": 523,
-      "is_exported": false,
-      "is_method": true,
-      "receiver_type": "*Client",
-      "lines": {
-        "total": 33,
-        "code": 27,
-        "comments": 0,
-        "blank": 6
-      },
-      "signature": {
-        "parameter_count": 3,
-        "return_count": 0,
-        "has_variadic": false,
-        "returns_error": false,
-        "interface_parameters": 0,
-        "generic_parameters": null,
-        "signature_complexity": 1.5
-      },
-      "complexity": {
-        "cyclomatic": 6,
-        "cognitive": 6,
-        "nesting_depth": 1,
-        "overall": 8.3
-      },
-      "documentation": {
-        "has_comment": true,
-        "comment_length": 63,
-        "has_example": false,
-        "quality_score": 0.252
-      }
     }
   ],
   "structs": null,
@@ -3987,15 +4167,15 @@
       "packages": 100,
       "functions": 100,
       "types": 88.88888888888889,
-      "methods": 88.88888888888889,
-      "overall": 89.74358974358975
+      "methods": 92.5925925925926,
+      "overall": 92.3076923076923
     },
     "quality": {
-      "average_length": 45.766323024054984,
+      "average_length": 46.163701067615655,
       "code_examples": 0,
-      "inline_comments": 308,
+      "inline_comments": 298,
       "block_comments": 0,
-      "quality_score": 45.897435897435905
+      "quality_score": 46.92307692307693
     },
     "todo_comments": [],
     "fixme_comments": [],
@@ -4033,7 +4213,7 @@
   "duplication": {
     "clone_pairs": 2,
     "duplicated_lines": 14,
-    "duplication_ratio": 0.0048093438680865686,
+    "duplication_ratio": 0.004768392370572207,
     "largest_clone_size": 8,
     "clones": [
       {
