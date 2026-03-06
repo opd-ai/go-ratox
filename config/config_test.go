@@ -164,6 +164,7 @@ func TestValidateTransport(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := &Config{
+				ConfigDir: "/valid/config/dir",
 				Transport: TransportConfig{
 					TorEnabled: tt.torEnabled,
 					I2PEnabled: tt.i2pEnabled,
@@ -177,6 +178,16 @@ func TestValidateTransport(t *testing.T) {
 				t.Errorf("Expected no error but got: %v", err)
 			}
 		})
+	}
+}
+
+func TestValidateTransportEmptyConfigDir(t *testing.T) {
+	cfg := &Config{
+		ConfigDir: "",
+		Transport: TransportConfig{},
+	}
+	if err := cfg.ValidateTransport(); err == nil {
+		t.Error("Expected error for empty ConfigDir but got nil")
 	}
 }
 
@@ -224,18 +235,20 @@ func TestBootstrapServerConfigPersistence(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	cfg := &Config{
-		ConfigDir: tempDir,
-		Name:      "Test User",
-		BootstrapServer: BootstrapServerConfig{
-			Enabled:         true,
-			ClearnetEnabled: true,
-			ClearnetPort:    33445,
-			OnionEnabled:    true,
-			I2PEnabled:      true,
-			I2PSAMAddr:      "127.0.0.1:7656",
-		},
+	// Start from a loaded config so that all defaults are populated,
+	// then modify only the BootstrapServer fields we care about.
+	cfg, err := Load(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to load initial config: %v", err)
 	}
+
+	cfg.Name = "Test User"
+	cfg.BootstrapServer.Enabled = true
+	cfg.BootstrapServer.ClearnetEnabled = true
+	cfg.BootstrapServer.ClearnetPort = 33445
+	cfg.BootstrapServer.OnionEnabled = true
+	cfg.BootstrapServer.I2PEnabled = true
+	cfg.BootstrapServer.I2PSAMAddr = "127.0.0.1:7656"
 
 	if err := cfg.Save(); err != nil {
 		t.Fatalf("Failed to save config: %v", err)
@@ -254,5 +267,9 @@ func TestBootstrapServerConfigPersistence(t *testing.T) {
 	}
 	if !loaded.BootstrapServer.I2PEnabled {
 		t.Error("Expected bootstrap server I2P enabled to persist")
+	}
+	// Verify default fields were not clobbered
+	if len(loaded.BootstrapNodes) == 0 {
+		t.Error("Expected bootstrap nodes to remain populated after persistence round-trip")
 	}
 }

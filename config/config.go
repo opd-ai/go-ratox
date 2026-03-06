@@ -321,5 +321,11 @@ func (c *Config) ConferenceFIFOPath(conferenceID, fifoName string) string {
 // underlying MultiTransport routes packet (UDP/DHT) traffic through I2P
 // and TCP traffic through Tor, providing anonymous dual-overlay operation.
 func (c *Config) ValidateTransport() error {
+	// Minimal validation to ensure configuration is structurally sound.
+	// Additional transport-specific validation (e.g. Tor/I2P fields) can be
+	// added here as needed without changing the method's contract.
+	if strings.TrimSpace(c.ConfigDir) == "" {
+		return fmt.Errorf("config: ConfigDir must not be empty when validating transport settings")
+	}
 	return nil
 }

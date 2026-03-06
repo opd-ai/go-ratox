@@ -26,6 +26,7 @@ type Client struct {
 	wg          sync.WaitGroup
 	running     bool
 	mu          sync.RWMutex
+	shutdownOnce sync.Once
 
 	// Bootstrap server (optional)
 	bootstrapServer *bootstrap.Server
@@ -528,46 +529,49 @@ func (c *Client) saveToxData() {
 	}
 }
 
-// Shutdown gracefully shuts down the client
+// Shutdown gracefully shuts down the client. It is safe to call multiple times.
 func (c *Client) Shutdown() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.shutdownOnce.Do(func() {
+		c.mu.Lock()
+		running := c.running
+		c.mu.Unlock()
 
-	if !c.running {
-		return
-	}
-
-	if c.config.Debug {
-		log.Println("Shutting down client...")
-	}
-
-	// Signal shutdown
-	close(c.shutdown)
-
-	// Cancel context to stop all goroutines
-	c.cancel()
-
-	// Wait for all goroutines to finish
-	c.wg.Wait()
-
-	// Save final state
-	c.saveToxData()
-
-	// Cleanup Tox
-	if c.tox != nil {
-		c.tox.Kill()
-	}
-
-	// Stop bootstrap server if running
-	if c.bootstrapServer != nil {
-		if err := c.bootstrapServer.Stop(); err != nil && c.config.Debug {
-			log.Printf("Warning: bootstrap server stop error: %v", err)
+		if !running {
+			return
 		}
-	}
 
-	if c.config.Debug {
-		log.Println("Client shutdown complete")
-	}
+		if c.config.Debug {
+			log.Println("Shutting down client...")
+		}
+
+		// Signal shutdown
+		close(c.shutdown)
+
+		// Cancel context to stop all goroutines
+		c.cancel()
+
+		// Wait for all goroutines to finish
+		c.wg.Wait()
+
+		// Save final state
+		c.saveToxData()
+
+		// Cleanup Tox
+		if c.tox != nil {
+			c.tox.Kill()
+		}
+
+		// Stop bootstrap server if running
+		if c.bootstrapServer != nil {
+			if err := c.bootstrapServer.Stop(); err != nil && c.config.Debug {
+				log.Printf("Warning: bootstrap server stop error: %v", err)
+			}
+		}
+
+		if c.config.Debug {
+			log.Println("Client shutdown complete")
+		}
+	})
 }
 
 // GetToxID returns the client's Tox ID as a hex string
