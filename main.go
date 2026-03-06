@@ -32,7 +32,22 @@ var (
 )
 
 func main() {
-	// Configure logrus with caller information
+	setupLogging()
+	logrus.WithField("caller", "main").Info("Starting ratox-go application")
+
+	if parseAndValidateFlags() {
+		return
+	}
+
+	configDir := determineConfigDir()
+	cfg := loadOrCreateConfig(configDir)
+	toxClient := createToxClient(cfg)
+	runClientWithGracefulShutdown(toxClient)
+
+	logrus.WithField("caller", "main").Info("ratox-go shutdown complete")
+}
+
+func setupLogging() {
 	logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
@@ -40,15 +55,15 @@ func main() {
 			return "", fmt.Sprintf(" [%s:%d %s()]", filepath.Base(f.File), f.Line, f.Function[strings.LastIndex(f.Function, ".")+1:])
 		},
 	})
+}
 
-	logrus.WithField("caller", "main").Info("Starting ratox-go application")
-
+func parseAndValidateFlags() bool {
 	flag.Parse()
 
 	if *showHelp {
 		logrus.WithField("caller", "main").Info("Displaying help and exiting")
 		printUsage()
-		return
+		return true
 	}
 
 	if *showVer {
@@ -57,10 +72,13 @@ func main() {
 			"version": Version,
 		}).Info("Displaying version and exiting")
 		fmt.Printf("ratox-go %s\n", Version)
-		return
+		return true
 	}
 
-	// Determine configuration directory
+	return false
+}
+
+func determineConfigDir() string {
 	configDir := *configPath
 	logrus.WithFields(logrus.Fields{
 		"caller":          "main",
@@ -84,7 +102,6 @@ func main() {
 		}).Info("Using default configuration directory")
 	}
 
-	// Create configuration directory if it doesn't exist
 	logrus.WithFields(logrus.Fields{
 		"caller":     "main",
 		"config_dir": configDir,
@@ -104,7 +121,10 @@ func main() {
 		"config_dir": configDir,
 	}).Info("Configuration directory ready")
 
-	// Load or create configuration
+	return configDir
+}
+
+func loadOrCreateConfig(configDir string) *config.Config {
 	logrus.WithFields(logrus.Fields{
 		"caller":     "main",
 		"config_dir": configDir,
@@ -127,7 +147,6 @@ func main() {
 		"auto_accept_files": cfg.AutoAcceptFiles,
 	}).Info("Configuration loaded successfully")
 
-	// Enable debug logging if requested
 	if *debug {
 		logrus.WithField("caller", "main").Info("Debug logging enabled via command line")
 		cfg.Debug = true
@@ -137,7 +156,10 @@ func main() {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	// Create and start the Tox client
+	return cfg
+}
+
+func createToxClient(cfg *config.Config) *client.Client {
 	logrus.WithFields(logrus.Fields{
 		"caller":    "main",
 		"operation": "create_client",
@@ -152,13 +174,14 @@ func main() {
 	}
 
 	logrus.WithField("caller", "main").Info("Tox client created successfully")
+	return toxClient
+}
 
-	// Handle graceful shutdown
+func runClientWithGracefulShutdown(toxClient *client.Client) {
 	logrus.WithField("caller", "main").Debug("Setting up signal handlers")
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start the client in a goroutine
 	logrus.WithField("caller", "main").Info("Starting Tox client in background goroutine")
 	errChan := make(chan error, 1)
 	go func() {
@@ -167,7 +190,6 @@ func main() {
 		logrus.WithField("caller", "main.goroutine").Debug("Client goroutine completed")
 	}()
 
-	// Wait for shutdown signal or error
 	logrus.WithField("caller", "main").Info("Waiting for shutdown signal or client error")
 	select {
 	case err := <-errChan:
@@ -188,8 +210,6 @@ func main() {
 		toxClient.Shutdown()
 		logrus.WithField("caller", "main").Info("Client shutdown completed")
 	}
-
-	logrus.WithField("caller", "main").Info("ratox-go shutdown complete")
 }
 
 func printUsage() {
