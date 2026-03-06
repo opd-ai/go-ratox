@@ -45,18 +45,22 @@ type Client struct {
 
 // incomingTransfer tracks an active incoming file transfer
 type incomingTransfer struct {
-	File     *os.File
-	Filename string
-	FileSize uint64
-	Received uint64
+	File         *os.File
+	FilePath     string
+	Filename     string
+	FileSize     uint64
+	Received     uint64
+	LastActivity time.Time
 }
 
 // outgoingTransfer tracks an active outgoing file transfer
 type outgoingTransfer struct {
-	File     *os.File
-	Filename string
-	FileSize uint64
-	Sent     uint64
+	File         *os.File
+	FilePath     string
+	Filename     string
+	FileSize     uint64
+	Sent         uint64
+	LastActivity time.Time
 }
 
 // Friend represents a Tox friend with associated metadata
@@ -330,6 +334,13 @@ func (c *Client) Run() error {
 		c.updateConnectionStatus()
 	}()
 
+	// Monitor stalled file transfers
+	c.wg.Add(1)
+	go func() {
+		defer c.wg.Done()
+		c.monitorStalledTransfers()
+	}()
+
 	// Main Tox iteration loop with dynamic interval
 	for {
 		select {
@@ -389,6 +400,64 @@ func (c *Client) updateConnectionStatus() {
 					log.Printf("Failed to update connection status: %v", err)
 				}
 			}
+		}
+	}
+}
+
+// monitorStalledTransfers checks for and cancels stalled file transfers
+func (c *Client) monitorStalledTransfers() {
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+	
+	const transferTimeout = 5 * time.Minute
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case <-ticker.C:
+			now := time.Now()
+			
+			// Check incoming transfers
+			c.transfersMu.Lock()
+			for key, transfer := range c.incomingTransfers {
+				if now.Sub(transfer.LastActivity) > transferTimeout {
+					log.Printf("Incoming transfer stalled: %s (last activity: %v ago)",
+						transfer.Filename, now.Sub(transfer.LastActivity))
+					
+					// Parse friendID and fileNumber from key
+					var friendID, fileNumber uint32
+					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
+						// Abort the transfer (must be done without holding the lock)
+						transferCopy := *transfer
+						keyCopy := key
+						c.transfersMu.Unlock()
+						c.abortFileReceive(friendID, fileNumber, keyCopy, &transferCopy)
+						c.transfersMu.Lock()
+					}
+				}
+			}
+			
+			// Check outgoing transfers
+			for key, transfer := range c.outgoingTransfers {
+				if now.Sub(transfer.LastActivity) > transferTimeout {
+					log.Printf("Outgoing transfer stalled: %s (last activity: %v ago)",
+						transfer.Filename, now.Sub(transfer.LastActivity))
+					
+					// Parse friendID and fileNumber from key
+					var friendID, fileNumber uint32
+					if _, err := fmt.Sscanf(key, "%d:%d", &friendID, &fileNumber); err == nil {
+						// Abort the transfer (must be done without holding the lock)
+						transferCopy := *transfer
+						keyCopy := key
+						c.transfersMu.Unlock()
+						c.cancelFileTransfer(friendID, fileNumber)
+						c.abortFileSend(friendID, fileNumber, keyCopy, &transferCopy)
+						c.transfersMu.Lock()
+					}
+				}
+			}
+			c.transfersMu.Unlock()
 		}
 	}
 }

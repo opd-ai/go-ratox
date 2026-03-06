@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/opd-ai/toxcore"
@@ -288,10 +289,12 @@ func (c *Client) acceptFileTransfer(friendID, fileNumber uint32, friendIDStr, fi
 	transferKey := fmt.Sprintf("%d:%d", friendID, fileNumber)
 	c.transfersMu.Lock()
 	c.incomingTransfers[transferKey] = &incomingTransfer{
-		File:     file,
-		Filename: filename,
-		FileSize: fileSize,
-		Received: 0,
+		File:         file,
+		FilePath:     destPath,
+		Filename:     filename,
+		FileSize:     fileSize,
+		Received:     0,
+		LastActivity: time.Now(),
 	}
 	c.transfersMu.Unlock()
 
@@ -367,19 +370,45 @@ func (c *Client) completeFileReceive(friendID uint32, transferKey string, transf
 
 func (c *Client) writeFileChunk(transfer *incomingTransfer, position uint64, data []byte) error {
 	if _, err := transfer.File.WriteAt(data, int64(position)); err != nil {
-		log.Printf("Failed to write file chunk: %v", err)
+		if isOutOfDiskSpaceError(err) {
+			log.Printf("Disk full: failed to write file chunk: %v", err)
+		} else {
+			log.Printf("Failed to write file chunk: %v", err)
+		}
 		return err
 	}
 	transfer.Received += uint64(len(data))
+	transfer.LastActivity = time.Now()
 	return nil
 }
 
+// isOutOfDiskSpaceError checks if an error indicates out of disk space
+func isOutOfDiskSpaceError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	return strings.Contains(errStr, "no space left on device") ||
+		strings.Contains(errStr, "disk full") ||
+		strings.Contains(errStr, "quota exceeded")
+}
+
 func (c *Client) abortFileReceive(friendID, fileNumber uint32, transferKey string, transfer *incomingTransfer) {
+	filePath := transfer.FilePath
 	transfer.File.Close()
 	c.transfersMu.Lock()
 	delete(c.incomingTransfers, transferKey)
 	c.transfersMu.Unlock()
 	c.cancelFileTransfer(friendID, fileNumber)
+	
+	// Clean up partial file
+	if filePath != "" {
+		if err := os.Remove(filePath); err != nil {
+			log.Printf("Warning: failed to remove partial file %s: %v", filePath, err)
+		} else {
+			log.Printf("Removed partial file: %s", filePath)
+		}
+	}
 }
 
 func (c *Client) completeFileSend(friendID uint32, transferKey string, transfer *outgoingTransfer) {
@@ -400,6 +429,27 @@ func (c *Client) completeFileSend(friendID uint32, transferKey string, transfer 
 		completionMsg := fmt.Sprintf("SENT %s %d", transfer.Filename, transfer.Sent)
 		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, completionMsg); err != nil {
 			log.Printf("Failed to write file send completion notification: %v", err)
+		}
+	}
+}
+
+func (c *Client) abortFileSend(friendID, fileNumber uint32, transferKey string, transfer *outgoingTransfer) {
+	transfer.File.Close()
+	c.transfersMu.Lock()
+	delete(c.outgoingTransfers, transferKey)
+	c.transfersMu.Unlock()
+	
+	log.Printf("File send aborted: %s (sent %d/%d bytes)", transfer.Filename, transfer.Sent, transfer.FileSize)
+	
+	c.friendsMu.RLock()
+	friend, exists := c.friends[friendID]
+	c.friendsMu.RUnlock()
+
+	if exists {
+		friendIDStr := hex.EncodeToString(friend.PublicKey[:])
+		abortMsg := fmt.Sprintf("ABORTED %s %d %d", transfer.Filename, transfer.Sent, transfer.FileSize)
+		if err := c.fifoManager.WriteFriendFileOut(friendIDStr, abortMsg); err != nil {
+			log.Printf("Failed to write file send abort notification: %v", err)
 		}
 	}
 }
@@ -429,9 +479,13 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 	chunk := make([]byte, length)
 	n, err := transfer.File.ReadAt(chunk, int64(position))
 	if err != nil && err != io.EOF {
-		log.Printf("Failed to read file chunk: %v", err)
+		if os.IsNotExist(err) {
+			log.Printf("File no longer exists: %s (%v)", transfer.FilePath, err)
+		} else {
+			log.Printf("Failed to read file chunk: %v", err)
+		}
 		c.cancelFileTransfer(friendID, fileNumber)
-		c.completeFileSend(friendID, transferKey, transfer)
+		c.abortFileSend(friendID, fileNumber, transferKey, transfer)
 		return
 	}
 
@@ -440,6 +494,7 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 	if n > 0 {
 		dataToSend = chunk[:n]
 		transfer.Sent += uint64(n)
+		transfer.LastActivity = time.Now()
 	} else {
 		dataToSend = nil // Empty chunk signals EOF
 	}
@@ -447,7 +502,7 @@ func (c *Client) handleFileChunkRequest(friendID, fileNumber uint32, position ui
 	if err := c.tox.FileSendChunk(friendID, fileNumber, position, dataToSend); err != nil {
 		log.Printf("Failed to send file chunk: %v", err)
 		c.cancelFileTransfer(friendID, fileNumber)
-		c.completeFileSend(friendID, transferKey, transfer)
+		c.abortFileSend(friendID, fileNumber, transferKey, transfer)
 		return
 	}
 

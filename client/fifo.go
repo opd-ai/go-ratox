@@ -802,10 +802,12 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 	transferKey := fmt.Sprintf("%d:%d", friendNum, transferID)
 	fm.client.transfersMu.Lock()
 	fm.client.outgoingTransfers[transferKey] = &outgoingTransfer{
-		File:     file,
-		Filename: filename,
-		FileSize: fileSize,
-		Sent:     0,
+		File:         file,
+		FilePath:     filePath,
+		Filename:     filename,
+		FileSize:     fileSize,
+		Sent:         0,
+		LastActivity: time.Now(),
 	}
 	fm.client.transfersMu.Unlock()
 

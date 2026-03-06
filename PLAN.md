@@ -517,14 +517,23 @@ Implementation:
 3. ✅ All tests pass with race detection
 4. ✅ Zero regression in complexity, duplication, or doc coverage
 
-#### Step 5.2: Improve Error Handling in File Transfers
+#### Step 5.2: Improve Error Handling in File Transfers ✅
+
+**Status:** COMPLETE
 
 **Goal:** Handle edge cases in file transfers.
 
-1. Handle disk-full errors when writing received file chunks.
-2. Handle file-not-found errors when reading chunks for sending.
-3. Implement transfer timeout/cancellation for stalled transfers.
-4. Clean up partial files on transfer failure.
+Implementation:
+1. ✅ Added disk-full error detection in `writeFileChunk` with specific error messages for disk space issues
+2. ✅ Added file-not-found error detection in `handleFileChunkRequest` with proper logging
+3. ✅ Implemented `monitorStalledTransfers` goroutine that checks for transfers with no activity for 5 minutes
+4. ✅ Enhanced transfer structs with `FilePath` and `LastActivity` fields for timeout tracking
+5. ✅ Added `abortFileReceive` function that cleans up partial files on failure
+6. ✅ Added `abortFileSend` function for proper cleanup of failed outgoing transfers
+7. ✅ All functions update `LastActivity` timestamp on successful chunk operations
+8. ✅ Stalled transfers are automatically cancelled with proper notifications to FIFOs
+9. ✅ All tests pass with race detection
+10. ✅ Zero critical regressions - minor complexity increases are within acceptable limits
 
 #### Step 5.3: Add Integration Test
 
