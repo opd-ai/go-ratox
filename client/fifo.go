@@ -530,43 +530,50 @@ func (fm *FIFOManager) monitorConferenceFIFOs(ctx context.Context, conferenceID 
 
 // readFIFO reads data from a FIFO and calls the handler function
 func (fm *FIFOManager) readFIFO(ctx context.Context, path string, handler func(string)) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
+	if err := checkContext(ctx); err != nil {
+		return err
 	}
 
-	// Open FIFO for reading (non-blocking)
-	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NONBLOCK, 0)
+	file, err := fm.openFIFONonBlocking(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Read data
-	reader := bufio.NewReader(file)
+	return fm.processLines(ctx, bufio.NewReader(file), handler)
+}
+
+func checkContext(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		return nil
+	}
+}
+
+func (fm *FIFOManager) openFIFONonBlocking(path string) (*os.File, error) {
+	return os.OpenFile(path, os.O_RDONLY|syscall.O_NONBLOCK, 0)
+}
+
+func (fm *FIFOManager) processLines(ctx context.Context, reader *bufio.Reader, handler func(string)) error {
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
+		if err := checkContext(ctx); err != nil {
+			return err
 		}
 
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				break
+				return nil
 			}
 			return err
 		}
 
-		line = strings.TrimSpace(line)
-		if line != "" {
+		if line = strings.TrimSpace(line); line != "" {
 			handler(line)
 		}
 	}
-
-	return nil
 }
 
 // writeFIFO writes data to a FIFO
@@ -736,71 +743,99 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 
 	log.Printf("File transfer request for %s: %s", friendID, filePath)
 
-	// Find friend by public key
-	publicKeyBytes, err := hex.DecodeString(friendID)
+	friendNum, err := fm.resolveFriendNumber(friendID)
 	if err != nil {
-		log.Printf("Invalid friend ID: %v", err)
 		return
 	}
 
-	if len(publicKeyBytes) != 32 {
-		log.Printf("Invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+	fileInfo, fileSize, err := fm.validateFileForSending(filePath)
+	if err != nil {
 		return
+	}
+
+	file, transferID, err := fm.initiateFileSend(friendNum, filePath, fileSize, fileInfo)
+	if err != nil {
+		return
+	}
+
+	fm.trackOutgoingTransfer(friendNum, transferID, file, filePath, fileInfo.Name(), fileSize)
+	log.Printf("File transfer initiated: %s (%d bytes) to friend %d, transfer ID: %d", fileInfo.Name(), fileSize, friendNum, transferID)
+}
+
+func (fm *FIFOManager) resolveFriendNumber(friendID string) (uint32, error) {
+	publicKeyBytes, err := hex.DecodeString(friendID)
+	if err != nil {
+		log.Printf("Invalid friend ID: %v", err)
+		return 0, err
+	}
+
+	if len(publicKeyBytes) != 32 {
+		err := fmt.Errorf("invalid friend ID length: expected 32 bytes, got %d", len(publicKeyBytes))
+		log.Print(err)
+		return 0, err
 	}
 
 	var publicKey [32]byte
 	copy(publicKey[:], publicKeyBytes)
 
-	// Find friend number by public key using toxcore API
 	friendNum, err := fm.client.tox.FriendByPublicKey(publicKey)
 	if err != nil {
 		log.Printf("Friend not found: %s (%v)", friendID, err)
-		return
+		return 0, err
 	}
 
-	// Check if file exists and get its size
+	return friendNum, nil
+}
+
+func (fm *FIFOManager) validateFileForSending(filePath string) (os.FileInfo, uint64, error) {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		log.Printf("File not found or inaccessible: %v", err)
-		return
+		return nil, 0, err
 	}
 
 	if fileInfo.IsDir() {
-		log.Printf("Cannot send directory: %s", filePath)
-		return
+		err := fmt.Errorf("cannot send directory: %s", filePath)
+		log.Print(err)
+		return nil, 0, err
 	}
 
 	fileSize := uint64(fileInfo.Size())
-
-	// Check file size limits
 	if fm.client.config.MaxFileSize > 0 && int64(fileSize) > fm.client.config.MaxFileSize {
-		log.Printf("File too large (%d bytes), maximum allowed: %d", fileSize, fm.client.config.MaxFileSize)
-		return
+		err := fmt.Errorf("file too large (%d bytes), maximum allowed: %d", fileSize, fm.client.config.MaxFileSize)
+		log.Print(err)
+		return nil, 0, err
 	}
 
-	// Generate file ID (use first 32 bytes of file path hash for simplicity)
+	return fileInfo, fileSize, nil
+}
+
+func (fm *FIFOManager) initiateFileSend(friendNum uint32, filePath string, fileSize uint64, fileInfo os.FileInfo) (*os.File, uint32, error) {
 	h := sha256.Sum256([]byte(filePath))
 	fileID := h
 
-	// Open file for reading
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Printf("Failed to open file: %v", err)
-		return
+		return nil, 0, err
 	}
 
-	// Start file transfer
 	filename := filepath.Base(filePath)
 	transferID, err := fm.client.tox.FileSend(friendNum, 0, fileSize, fileID, filename)
 	if err != nil {
 		log.Printf("Failed to initiate file transfer: %v", err)
 		file.Close()
-		return
+		return nil, 0, err
 	}
 
-	// Track outgoing transfer
+	return file, transferID, nil
+}
+
+func (fm *FIFOManager) trackOutgoingTransfer(friendNum, transferID uint32, file *os.File, filePath, filename string, fileSize uint64) {
 	transferKey := fmt.Sprintf("%d:%d", friendNum, transferID)
 	fm.client.transfersMu.Lock()
+	defer fm.client.transfersMu.Unlock()
+
 	fm.client.outgoingTransfers[transferKey] = &outgoingTransfer{
 		File:         file,
 		FilePath:     filePath,
@@ -809,9 +844,6 @@ func (fm *FIFOManager) handleFriendFileIn(friendID, filePath string) {
 		Sent:         0,
 		LastActivity: time.Now(),
 	}
-	fm.client.transfersMu.Unlock()
-
-	log.Printf("File transfer initiated: %s (%d bytes) to friend %d, transfer ID: %d", filename, fileSize, friendNum, transferID)
 }
 
 // handleFriendRemoveIn processes friend removal requests
