@@ -670,6 +670,11 @@ func (c *Client) AcceptFriendRequest(publicKey [32]byte) (uint32, error) {
 
 // UpdateSelfName updates the client's display name
 func (c *Client) UpdateSelfName(name string) error {
+	const maxNameLength = 128
+	if len(name) > maxNameLength {
+		return fmt.Errorf("name exceeds maximum length of %d characters", maxNameLength)
+	}
+
 	if err := c.tox.SelfSetName(name); err != nil {
 		return err
 	}
@@ -680,6 +685,11 @@ func (c *Client) UpdateSelfName(name string) error {
 
 // UpdateSelfStatusMessage updates the client's status message
 func (c *Client) UpdateSelfStatusMessage(message string) error {
+	const maxStatusMessageLength = 1007
+	if len(message) > maxStatusMessageLength {
+		return fmt.Errorf("status message exceeds maximum length of %d characters", maxStatusMessageLength)
+	}
+
 	if err := c.tox.SelfSetStatusMessage(message); err != nil {
 		return err
 	}

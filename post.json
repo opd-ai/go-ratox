@@ -1348,10 +1348,10 @@
       "is_method": true,
       "receiver_type": "*Client",
       "lines": {
-        "total": 6,
-        "code": 5,
+        "total": 11,
+        "code": 9,
         "comments": 0,
-        "blank": 1
+        "blank": 2
       },
       "signature": {
         "parameter_count": 1,
@@ -1363,10 +1363,10 @@
         "signature_complexity": 0.8
       },
       "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
+        "cyclomatic": 3,
+        "cognitive": 3,
         "nesting_depth": 1,
-        "overall": 3.1
+        "overall": 4.4
       },
       "documentation": {
         "has_comment": true,
@@ -1379,15 +1379,15 @@
       "name": "UpdateSelfStatusMessage",
       "package": "client",
       "file": "client/client.go",
-      "line": 682,
+      "line": 687,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
       "lines": {
-        "total": 6,
-        "code": 5,
+        "total": 11,
+        "code": 9,
         "comments": 0,
-        "blank": 1
+        "blank": 2
       },
       "signature": {
         "parameter_count": 1,
@@ -1399,10 +1399,10 @@
         "signature_complexity": 0.8
       },
       "complexity": {
-        "cyclomatic": 2,
-        "cognitive": 2,
+        "cyclomatic": 3,
+        "cognitive": 3,
         "nesting_depth": 1,
-        "overall": 3.1
+        "overall": 4.4
       },
       "documentation": {
         "has_comment": true,
@@ -1415,7 +1415,7 @@
       "name": "CreateConference",
       "package": "client",
       "file": "client/client.go",
-      "line": 692,
+      "line": 702,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -1451,7 +1451,7 @@
       "name": "SendConferenceMessage",
       "package": "client",
       "file": "client/client.go",
-      "line": 713,
+      "line": 723,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -1487,7 +1487,7 @@
       "name": "InviteToConference",
       "package": "client",
       "file": "client/client.go",
-      "line": 722,
+      "line": 732,
       "is_exported": true,
       "is_method": true,
       "receiver_type": "*Client",
@@ -4033,7 +4033,7 @@
   "duplication": {
     "clone_pairs": 2,
     "duplicated_lines": 14,
-    "duplication_ratio": 0.004825922095829024,
+    "duplication_ratio": 0.0048093438680865686,
     "largest_clone_size": 8,
     "clones": [
       {

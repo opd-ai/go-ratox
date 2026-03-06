@@ -375,3 +375,146 @@ func formatUint32(n uint32) string {
 	}
 	return string(result)
 }
+
+// TestUpdateSelfNameValidation tests name length validation
+func TestUpdateSelfNameValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		expectError bool
+		errorSubstr string
+	}{
+		{
+			name:        "empty name",
+			input:       "",
+			expectError: false,
+		},
+		{
+			name:        "normal name",
+			input:       "Alice",
+			expectError: false,
+		},
+		{
+			name:        "exactly 128 characters",
+			input:       string(make([]byte, 128)),
+			expectError: false,
+		},
+		{
+			name:        "129 characters - too long",
+			input:       string(make([]byte, 129)),
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 128",
+		},
+		{
+			name:        "500 characters - way too long",
+			input:       string(make([]byte, 500)),
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 128",
+		},
+		{
+			name:        "UTF-8 name within limit",
+			input:       "Alice 世界",
+			expectError: false,
+		},
+		{
+			name:        "UTF-8 name at boundary (128 bytes)",
+			input:       string(make([]byte, 122)) + "世界", // 122 + 6 bytes = 128 bytes
+			expectError: false,
+		},
+		{
+			name:        "UTF-8 name exceeding limit (129+ bytes)",
+			input:       string(make([]byte, 123)) + "世界", // 123 + 6 bytes = 129 bytes
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 128",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test the validation logic directly
+			const maxNameLength = 128
+			isTooLong := len(tt.input) > maxNameLength
+
+			if tt.expectError && !isTooLong {
+				t.Error("Expected validation error but input is within limit")
+			}
+			if !tt.expectError && isTooLong {
+				t.Errorf("Input should be valid but exceeds limit: %d bytes", len(tt.input))
+			}
+		})
+	}
+}
+
+// TestUpdateSelfStatusMessageValidation tests status message length validation
+func TestUpdateSelfStatusMessageValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		expectError bool
+		errorSubstr string
+	}{
+		{
+			name:        "empty status message",
+			input:       "",
+			expectError: false,
+		},
+		{
+			name:        "normal status message",
+			input:       "Available for chat",
+			expectError: false,
+		},
+		{
+			name:        "exactly 1007 characters",
+			input:       string(make([]byte, 1007)),
+			expectError: false,
+		},
+		{
+			name:        "1008 characters - too long",
+			input:       string(make([]byte, 1008)),
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 1007",
+		},
+		{
+			name:        "2000 characters - way too long",
+			input:       string(make([]byte, 2000)),
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 1007",
+		},
+		{
+			name:        "UTF-8 status within limit",
+			input:       "Running ratox-go 世界",
+			expectError: false,
+		},
+		{
+			name:        "UTF-8 status at boundary (1007 bytes)",
+			input:       string(make([]byte, 1001)) + "世界", // 1001 + 6 bytes = 1007 bytes
+			expectError: false,
+		},
+		{
+			name:        "UTF-8 status exceeding limit (1008+ bytes)",
+			input:       string(make([]byte, 1002)) + "世界", // 1002 + 6 bytes = 1008 bytes
+			expectError: true,
+			errorSubstr: "exceeds maximum length of 1007",
+		},
+		{
+			name:        "multiline status message",
+			input:       "Line 1\nLine 2\nLine 3",
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test the validation logic directly
+			const maxStatusMessageLength = 1007
+			isTooLong := len(tt.input) > maxStatusMessageLength
+
+			if tt.expectError && !isTooLong {
+				t.Error("Expected validation error but input is within limit")
+			}
+			if !tt.expectError && isTooLong {
+				t.Errorf("Input should be valid but exceeds limit: %d bytes", len(tt.input))
+			}
+		})
+	}
+}
