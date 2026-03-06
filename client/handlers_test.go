@@ -354,14 +354,14 @@ func TestFileSizeValidation(t *testing.T) {
 		valid    bool
 	}{
 		{"under limit", 512 * 1024, true},
-		{"at limit", uint64(maxFileSize), true},
-		{"over limit", uint64(maxFileSize) + 1, false},
+		{"at limit", uint64(maxFileSize), true},        //nolint:gosec // maxFileSize is positive, safe to convert
+		{"over limit", uint64(maxFileSize) + 1, false}, //nolint:gosec // maxFileSize is positive, safe to convert
 		{"zero size", 0, true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			isValid := int64(tt.filesize) <= maxFileSize
+			isValid := tt.filesize <= uint64(maxFileSize) //nolint:gosec // maxFileSize>0 ensures safe conversion
 			if isValid != tt.valid {
 				t.Errorf("Expected validity %v, got %v", tt.valid, isValid)
 			}
