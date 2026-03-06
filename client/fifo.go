@@ -362,7 +362,9 @@ func (fm *FIFOManager) getTransportInfo() string {
 	cfg := fm.config.Transport
 	var transportType string
 
-	if cfg.TorEnabled {
+	if cfg.TorEnabled && cfg.I2PEnabled {
+		transportType = fmt.Sprintf("tor+i2p (SOCKS5: %s, SAM: %s)", cfg.TorSOCKSAddr, cfg.I2PSAMAddr)
+	} else if cfg.TorEnabled {
 		transportType = fmt.Sprintf("tor (SOCKS5: %s)", cfg.TorSOCKSAddr)
 	} else if cfg.I2PEnabled {
 		transportType = fmt.Sprintf("i2p (SAM: %s)", cfg.I2PSAMAddr)
